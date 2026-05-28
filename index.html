@@ -8,15 +8,16 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; }
-        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); padding: 1.5rem; }
+        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); padding: 1.5rem; transition: transform 0.2s; }
+        .card:hover { border-color: #475569; }
         
-        /* Sistema de Cores Automático para os Cards de Feedback */
-        .borda-vermelho { border-left: 5px solid #ef4444; }
-        .borda-amarelo { border-left: 5px solid #f59e0b; }
-        .borda-verde { border-left: 5px solid #10b981; }
-        .borda-azul { border-left: 5px solid #3b82f6; }
+        /* Sistema de Cores Automático */
+        .borda-vermelho { border-left: 6px solid #ef4444; }
+        .borda-amarelo { border-left: 6px solid #f59e0b; }
+        .borda-verde { border-left: 6px solid #10b981; }
+        .borda-azul { border-left: 6px solid #3b82f6; }
         
-        .script-box { background-color: #0f172a; border-left: 3px solid #64748b; padding: 1rem; border-radius: 0.5rem; font-style: italic; }
+        .script-box { background-color: #0f172a; border-left: 3px solid #3b82f6; padding: 1rem; border-radius: 0.5rem; font-style: italic; }
     </style>
 </head>
 <body class="p-4 md:p-10">
@@ -28,78 +29,298 @@
                 <p class="text-blue-400 mt-1 font-medium">Inteligência de Vendas & SPIN Selling</p>
             </div>
             <div id="status-box" class="mt-4 md:mt-0 px-4 py-2 bg-slate-800 rounded-full text-sm font-semibold border border-slate-600 flex items-center gap-2">
-                <span class="relative flex h-3 w-3">
-                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                  <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-                </span>
-                Procurando dados na nuvem...
+                <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span></span>
+                Carregando dados na nuvem...
             </div>
         </header>
 
-        <div id="tela-espera" class="text-center mt-20">
+        <div id="tela-espera" class="text-center mt-20 block">
             <h2 class="text-2xl font-bold text-slate-300">O Robô está analisando as ligações ⚙️</h2>
-            <p class="text-slate-500 mt-4 max-w-lg mx-auto">Se você acabou de subir um CSV, a Inteligência Artificial está escutando os áudios neste momento. Esta página será atualizada automaticamente quando o banco de dados for gerado.</p>
+            <p class="text-slate-500 mt-4 max-w-lg mx-auto">A Inteligência Artificial está processando os áudios. Esta página exibirá os gráficos assim que o banco de dados for atualizado na nuvem.</p>
         </div>
 
         <div id="dashboard-conteudo" class="hidden">
-            <div class="flex flex-wrap gap-4 mb-8 bg-slate-800 p-4 rounded-xl border border-slate-700">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
                 <div class="flex flex-col">
                     <label class="text-xs text-slate-400 mb-1 uppercase tracking-wider font-bold">Ano</label>
-                    <select id="filtro-ano" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg outline-none focus:border-blue-500 w-32"></select>
+                    <select id="filtro-ano" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg outline-none focus:border-blue-500 transition-colors"></select>
                 </div>
                 <div class="flex flex-col">
                     <label class="text-xs text-slate-400 mb-1 uppercase tracking-wider font-bold">Mês</label>
-                    <select id="filtro-mes" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg outline-none focus:border-blue-500 w-40"></select>
+                    <select id="filtro-mes" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg outline-none focus:border-blue-500 transition-colors"></select>
                 </div>
-                <div class="flex flex-col flex-1 min-w-[200px]">
+                <div class="flex flex-col">
                     <label class="text-xs text-slate-400 mb-1 uppercase tracking-wider font-bold">SDR Analisado</label>
-                    <select id="filtro-sdr" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg outline-none focus:border-blue-500 w-full"></select>
+                    <select id="filtro-sdr" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg outline-none focus:border-blue-500 transition-colors"></select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="card flex flex-col items-center justify-center bg-slate-800/50">
+                    <h3 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Nota Média Geral</h3>
+                    <span id="kpi-nota" class="text-4xl font-black text-white mt-2">-</span>
+                </div>
+                <div class="card flex flex-col items-center justify-center bg-slate-800/50">
+                    <h3 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total de Ligações</h3>
+                    <span id="kpi-chamadas" class="text-4xl font-black text-blue-400 mt-2">-</span>
+                </div>
+                <div class="card flex flex-col items-center justify-center bg-slate-800/50">
+                    <h3 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Ritmo Médio (WPS)</h3>
+                    <span id="kpi-wps" class="text-4xl font-black text-white mt-2">-</span>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                 <div class="card flex flex-col items-center justify-center">
-                    <h2 class="text-xl font-bold text-white mb-2 w-full text-left">Competências SPIN Selling</h2>
-                    <p class="text-sm text-slate-400 mb-4 w-full text-left">Domínio técnico nas etapas da metodologia.</p>
-                    <div class="w-full max-w-sm">
+                    <h2 class="text-xl font-bold text-white mb-2 w-full">Domínio da Metodologia SPIN</h2>
+                    <p class="text-sm text-slate-400 mb-4 w-full">Média das pontuações técnicas nas etapas de investigação.</p>
+                    <div class="w-full max-w-xs md:max-w-sm">
                         <canvas id="spinRadarChart"></canvas>
                     </div>
                 </div>
                 
                 <div class="card flex flex-col items-center justify-center">
-                    <h2 class="text-xl font-bold text-white mb-2 w-full text-left">Evolução de Notas</h2>
-                    <p class="text-sm text-slate-400 mb-4 w-full text-left">Média geral das últimas ligações analisadas.</p>
-                    <div class="w-full">
+                    <h2 class="text-xl font-bold text-white mb-2 w-full">Evolução de Performance</h2>
+                    <p class="text-sm text-slate-400 mb-4 w-full">Histórico cronológico das notas gerais do SDR.</p>
+                    <div class="w-full h-64 flex items-center justify-center">
                         <canvas id="evolucaoLineChart"></canvas>
                     </div>
                 </div>
             </div>
 
             <div>
-                <h2 class="text-2xl font-bold text-white mb-6 border-b border-slate-700 pb-2">Feedbacks Táticos & Correções</h2>
-                <div id="lista-feedbacks" class="space-y-6">
-                    </div>
+                <h2 class="text-2xl font-bold text-white mb-6 border-b border-slate-700 pb-2">Auditoria Detalhada & Scripts Táticos</h2>
+                <div id="lista-feedbacks" class="space-y-6"></div>
             </div>
+            
         </div>
-
     </div>
 
     <script>
-        // O código Javascript avançado para desenhar os gráficos e ler o JSON
-        // será implementado na nossa próxima etapa para manter o código limpo!
-        
-        // Simulação básica de verificação do arquivo
+        let dadosGlobais = {};
+        let radarChart = null;
+        let lineChart = null;
+
+        // Tenta buscar o banco de dados consolidado
         fetch('consolidated_data.json')
             .then(response => {
-                if(response.ok) {
-                    document.getElementById('tela-espera').classList.add('hidden');
-                    document.getElementById('dashboard-conteudo').classList.remove('hidden');
-                    document.getElementById('status-box').innerHTML = '✅ Dados sincronizados';
-                    document.getElementById('status-box').classList.replace('bg-slate-800', 'bg-emerald-900');
-                    document.getElementById('status-box').classList.replace('border-slate-600', 'border-emerald-600');
-                }
+                if (!response.ok) throw new Error("Arquivo não encontrado");
+                return response.json();
             })
-            .catch(error => console.log('Aguardando JSON...'));
+            .then(data => {
+                dadosGlobais = data;
+                inicializarDashboard();
+            })
+            .catch(err => {
+                console.log("Aguardando geração do JSON pelas Actions...");
+            });
+
+        function inicializarDashboard() {
+            document.getElementById('tela-espera').classList.add('hidden');
+            document.getElementById('dashboard-conteudo').classList.remove('hidden');
+            
+            const statusBox = document.getElementById('status-box');
+            statusBox.innerHTML = '✅ Banco de Dados Ativo';
+            statusBox.className = "mt-4 md:mt-0 px-4 py-2 bg-emerald-950 text-emerald-400 rounded-full text-sm font-semibold border border-emerald-700 flex items-center gap-2 shadow-lg shadow-emerald-900/20";
+
+            const anos = Object.keys(dadosGlobais);
+            if (anos.length === 0) return;
+
+            const selectAno = document.getElementById('filtro-ano');
+            anos.forEach(ano => selectAno.add(new Option(ano, ano)));
+
+            selectAno.addEventListener('change', atualizarMeses);
+            atualizarMeses();
+        }
+
+        function atualizarMeses() {
+            const ano = document.getElementById('filtro-ano').value;
+            const selectMes = document.getElementById('filtro-mes');
+            selectMes.innerHTML = '';
+
+            const meses = Object.keys(dadosGlobais[ano] || {});
+            meses.forEach(mes => selectMes.add(new Option(mes, mes)));
+
+            selectMes.addEventListener('change', atualizarSDRs);
+            atualizarSDRs();
+        }
+
+        function atualizarSDRs() {
+            const ano = document.getElementById('filtro-ano').value;
+            const mes = document.getElementById('filtro-mes').value;
+            const selectSDR = document.getElementById('filtro-sdr');
+            selectSDR.innerHTML = '';
+
+            const sdrs = Object.keys(dadosGlobais[ano]?.[mes] || {});
+            sdrs.forEach(sdr => selectSDR.add(new Option(sdr, sdr)));
+
+            selectSDR.addEventListener('change', renderizarDadosSDR);
+            renderizarDadosSDR();
+        }
+
+        function renderizarDadosSDR() {
+            const ano = document.getElementById('filtro-ano').value;
+            const mes = document.getElementById('filtro-mes').value;
+            const sdr = document.getElementById('filtro-sdr').value;
+
+            const chamadas = dadosGlobais[ano]?.[mes]?.[sdr] || [];
+            if (chamadas.length === 0) return;
+
+            let somaS = 0, somap = 0, somaI = 0, somaN = 0;
+            let somaNotaGeral = 0, somaWPS = 0;
+            let notasGerais = [];
+            let labelsChamadas = [];
+            let containerFeedbacks = document.getElementById('lista-feedbacks');
+            containerFeedbacks.innerHTML = '';
+
+            chamadas.forEach((c, idx) => {
+                const sc = c.analise.spin_scoring;
+                const notaGeral = c.analise.nota_geral;
+                
+                somaS += sc.situacao;
+                somap += sc.problema;
+                somaI += sc.implicacao;
+                somaN += sc.necessidade_solucao;
+                somaNotaGeral += notaGeral;
+                somaWPS += c.analise.wps_media;
+
+                notasGerais.push(notaGeral);
+                labelsChamadas.push(`Ligação ${idx + 1}`);
+
+                // Define cor dinâmica para o texto da nota com base no desempenho
+                let corTextoNota = 'text-white';
+                if (notaGeral >= 8) corTextoNota = 'text-emerald-400';
+                else if (notaGeral <= 5) corTextoNota = 'text-red-400';
+                else corTextoNota = 'text-amber-400';
+
+                let corBorda = `borda-${c.analise.cor_sinalizadora}`;
+                let htmlPontos = '';
+                
+                // Trata o caso raro de ligações perfeitas sem erros
+                if (!c.analise.pontos_melhoria || c.analise.pontos_melhoria.length === 0) {
+                    htmlPontos = `<div class="mt-4 p-3 bg-emerald-900/30 border border-emerald-800 rounded text-emerald-400 text-sm font-medium">✨ Excelência técnica: Nenhum ponto crítico de melhoria detectado nesta ligação.</div>`;
+                } else {
+                    c.analise.pontos_melhoria.forEach(p => {
+                        htmlPontos += `
+                            <div class="mt-4 border-t border-slate-700 pt-3">
+                                <span class="inline-block px-2 py-0.5 bg-slate-900 text-xs text-blue-400 rounded font-bold uppercase tracking-wider">${p.etapa}</span>
+                                <p class="text-sm mt-2 text-slate-300"><strong class="text-white">Erro Identificado:</strong> ${p.erro_identificado}</p>
+                                <p class="text-sm text-slate-400 mt-1"><strong class="text-slate-300">Impacto Técnico:</strong> ${p.impacto_tecnico}</p>
+                                <p class="text-sm text-slate-400 mt-1"><strong class="text-slate-300">Estratégia Correta:</strong> ${p.como_deveria_ter_feito}</p>
+                                <div class="script-box mt-3">
+                                    <span class="text-xs text-blue-400 font-bold block not-italic uppercase mb-1 flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                                        Script Prático Sugerido:
+                                    </span>
+                                    "${p.script_alternativo}"
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // CORREÇÃO: Puxando a data do JSON corretamente
+                const dataFormatada = c.data_atividade || 'Data não informada';
+
+                containerFeedbacks.innerHTML += `
+                    <div class="card ${corBorda}">
+                        <div class="flex justify-between items-start flex-wrap gap-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-white">${c.titulo || 'Chamada Auditada'}</h3>
+                                <div class="flex flex-wrap gap-3 mt-1">
+                                    <span class="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded">ID: ${c.id_registro}</span>
+                                    <span class="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded">🗓️ ${dataFormatada}</span>
+                                    <span class="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded">⏱️ ${c.duracao || '--:--'}</span>
+                                </div>
+                                <p class="text-sm text-slate-300 mt-3">Ritmo de fala: <strong class="text-blue-300">${c.analise.wps_media} WPS (${c.analise.wps_classificacao})</strong></p>
+                            </div>
+                            <div class="text-right bg-slate-900 p-3 rounded-lg border border-slate-700 min-w-[100px]">
+                                <span class="text-3xl font-black ${corTextoNota}">${notaGeral}</span><span class="text-slate-500 text-sm font-bold">/10</span>
+                                <div class="text-[10px] font-bold uppercase text-slate-400 mt-1">Nota Geral</div>
+                            </div>
+                        </div>
+                        ${htmlPontos}
+                    </div>
+                `;
+            });
+
+            const total = chamadas.length;
+            const mediasSPIN = [(somaS/total).toFixed(1), (somap/total).toFixed(1), (somaI/total).toFixed(1), (somaN/total).toFixed(1)];
+            
+            // Atualiza os KPIs na tela
+            document.getElementById('kpi-nota').innerText = (somaNotaGeral / total).toFixed(1);
+            document.getElementById('kpi-chamadas').innerText = total;
+            document.getElementById('kpi-wps').innerText = (somaWPS / total).toFixed(1);
+
+            // Renderiza o Gráfico de Radar
+            if (radarChart) radarChart.destroy();
+            const ctxRadar = document.getElementById('spinRadarChart').getContext('2d');
+            radarChart = new Chart(ctxRadar, {
+                type: 'radar',
+                data: {
+                    labels: ['S - Situação', 'P - Problema', 'I - Implicação', 'N - Necessidade'],
+                    datasets: [{
+                        label: 'Média de Domínio',
+                        data: mediasSPIN,
+                        backgroundColor: 'rgba(59, 130, 246, 0.25)',
+                        borderColor: '#3b82f6',
+                        pointBackgroundColor: '#60a5fa',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#3b82f6',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            grid: { color: '#334155' },
+                            angleLines: { color: '#334155' },
+                            pointLabels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' } },
+                            suggestedMin: 0,
+                            suggestedMax: 10,
+                            ticks: { display: false }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Renderiza o Gráfico de Linha
+            if (lineChart) lineChart.destroy();
+            const ctxLine = document.getElementById('evolucaoLineChart').getContext('2d');
+            lineChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: labelsChamadas,
+                    datasets: [{
+                        label: 'Nota Geral',
+                        data: notasGerais,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { min: 0, max: 10, grid: { color: '#334155', borderDash: [5, 5] }, ticks: { color: '#94a3b8', stepSize: 2 } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { backgroundColor: '#1e293b', titleColor: '#fff', bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1 }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
