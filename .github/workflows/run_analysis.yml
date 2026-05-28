@@ -1,0 +1,47 @@
+name: Executar Auditoria de SDRs
+
+on:
+  push:
+    paths:
+      - 'dados_chamadas.csv' # O robô acorda automaticamente ao ver um novo CSV
+  workflow_dispatch: # Permite que você force o robô a rodar manualmente pelo botão
+
+# PERMISSÃO OBRIGATÓRIA: Autoriza o robô a salvar arquivos novos no repositório
+permissions:
+  contents: write
+
+jobs:
+  audit_calls:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 1. Baixar o código do repositório
+      uses: actions/checkout@v4
+
+    - name: 2. Configurar o Python na Máquina Virtual
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: 3. Instalar a biblioteca da Inteligência Artificial do Google
+      run: |
+        python -m pip install --upgrade pip
+        pip install google-generativeai
+
+    - name: 4. Executar o Script de Análise das Chamadas
+      env:
+        # CORREÇÃO: Formato exato que o GitHub exige para ler o cofre
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }} 
+      run: python process_calls.py
+
+    - name: 5. Guardar as novas análises e histórico de forma automática
+      run: |
+        git config --global user.name "Robo Auditor de SDR"
+        git config --global user.email "actions@github.com"
+        
+        # Adiciona a pasta e o arquivo consolidado (não trava se for o 1º uso)
+        git add analises_salvas/ || true
+        git add consolidated_data.json || true
+        
+        # Confere se há novidades; se houver, comita e salva no repositório [skip ci] evita loop infinito
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Automação: Novas análises salvas no histórico [skip ci]" && git push)
