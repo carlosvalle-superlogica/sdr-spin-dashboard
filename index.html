@@ -30,9 +30,6 @@
                 <button onclick="switchTab('equipe')" id="menu-equipe" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition">
                     <i class="fa-solid fa-users w-5"></i> Equipe SDR
                 </button>
-                <button onclick="switchTab('instrucoes')" id="menu-instrucoes" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition">
-                    <i class="fa-solid fa-circle-info w-5"></i> Documentação
-                </button>
             </nav>
         </div>
         <div class="text-xs text-gray-500 border-t border-gray-800 pt-4 text-center">
@@ -48,7 +45,7 @@
                 <p id="page-subtitle" class="text-sm text-gray-400 mt-1">Consolidação do processo de vendas corporativo.</p>
             </div>
             <div class="bg-emerald-950/50 text-emerald-400 border border-emerald-800 px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2">
-                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> Sistema Operacional
+                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> Painel Ativo
             </div>
         </div>
 
@@ -82,7 +79,7 @@
                             </tr>
                         </thead>
                         <tbody id="tabela-criticos" class="text-sm divide-y divide-gray-800">
-                            <tr><td colspan="5" class="py-4 text-center text-gray-500">A processar dados...</td></tr>
+                            <tr><td colspan="5" class="py-4 text-center text-gray-500">Buscando informações consolidadas...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -91,15 +88,9 @@
 
         <div id="tab-equipe" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 items-start"></div>
 
-        <div id="tab-instrucoes" class="hidden card-dark p-6 rounded-xl space-y-4">
-            <h3 class="text-xl font-bold text-white">Sobre o Sistema de Auditoria</h3>
-            <p class="text-gray-400 text-sm leading-relaxed">
-                Este sistema utiliza a integração entre <strong>HubSpot</strong> e a inteligência artificial do modelo <strong>Llama-3 via Groq API</strong>. O robô faz o download da ligação original, converte em texto usando tecnologia Whisper (Zero-Shot Translation) e audita o comportamento do vendedor baseado exclusivamente nas 4 etapas metodológicas do <strong>SPIN Selling</strong> (Situação, Problema, Implicação e Necessidade).
-            </p>
-        </div>
     </div>
 
-    <div id="modal-sdr" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 transition-opacity">
+    <div id="modal-sdr" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
         <div class="bg-gray-900 border border-gray-800 w-full max-w-6xl rounded-2xl h-[85vh] flex flex-col shadow-2xl relative">
             <div id="modal-loader" class="hidden absolute inset-0 bg-gray-900/90 z-10 flex items-center justify-center rounded-2xl">
                 <div class="text-indigo-400 flex flex-col items-center">
@@ -134,35 +125,32 @@
         let database = {};
 
         function switchTab(tab) {
-            ['geral', 'equipe', 'instrucoes'].forEach(t => {
+            ['geral', 'equipe'].forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
                 document.getElementById(`menu-${t}`).classList.remove('sidebar-active');
             });
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             document.getElementById(`menu-${tab}`).classList.add('sidebar-active');
             
-            document.getElementById('page-title').innerText = 
-                tab === 'geral' ? "Visão Geral" : tab === 'equipe' ? "Equipe SDR" : "Documentação";
+            document.getElementById('page-title').innerText = tab === 'geral' ? "Visão Geral" : "Equipe SDR";
         }
 
         async function init() {
             try {
-                const cacheBuster = new Date().getTime();
-                const response = await fetch(`consolidated_data.json?t=${cacheBuster}`);
-                
-                if (!response.ok) throw new Error("Banco de dados não encontrado.");
+                const response = await fetch('consolidated_data.json?v=' + Date.now());
+                if (!response.ok) throw new Error("Arquivo não encontrado.");
                 database = await response.json();
                 renderDashboard();
             } catch (e) {
-                console.error("Erro ao carregar o sistema:", e);
-                document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500">Aguardando a conclusão do processamento do robô no GitHub Actions...</td></tr>`;
+                console.error("Erro ao carregar os dados:", e);
+                document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-amber-500">Aguardando o primeiro processamento completo do robô no GitHub Actions...</td></tr>`;
             }
         }
 
         function renderDashboard() {
             const chamadas = Object.values(database);
             if (chamadas.length === 0) {
-                document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500">Nenhuma ligação com áudio válido encontrada no período.</td></tr>`;
+                document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500">Nenhuma ligação com áudio válido processada ainda.</td></tr>`;
                 return;
             }
 
@@ -171,7 +159,6 @@
             const mediaGlobal = (somaNotas / total).toFixed(1);
             const criticos = chamadas.filter(c => (parseFloat(c.nota_spin) || 0) < 6).length;
 
-            // IDS CORRIGIDOS AQUI (EVITA TRAVAMENTO DO JS)
             document.getElementById('total-ligacoes').innerText = total;
             document.getElementById('media-geral').innerText = mediaGlobal;
             document.getElementById('casos-criticos').innerText = criticos;
