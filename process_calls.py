@@ -20,6 +20,10 @@ CSV_FILE = "dados_chamadas.csv"
 CONSOLIDATED_FILE = "consolidated_data.json"
 PORTAL_ID = "20131994"
 
+# Modelos ativos oficiais estáveis da API Groq
+MODELO_RAPIDO = "llama3-8b-8192"
+MODELO_PARERES = "llama3-70b-8192"
+
 # ==========================================
 # 2. SISTEMAS DE SEGURANÇA E MATEMÁTICA
 # ==========================================
@@ -142,7 +146,7 @@ def process_all_calls():
             duration = row.get("Duração da chamada (HH:mm:ss)", "").strip() or "00:00"
             title = row.get("Título da chamada", "").strip()
             
-            # Recupera IDs associados e constrói dinamicamente a URL do HubSpot (Bug da URL fixado)
+            # Recupera IDs associados e constrói dinamicamente a URL do HubSpot
             deal_id = row.get("Associated Deal IDs", "").strip()
             deal_url = ""
             if deal_id:
@@ -164,6 +168,12 @@ def process_all_calls():
                 req = urllib.request.Request(audio_url, headers={'User-Agent': 'Mozilla/5.0'})
                 with urllib.request.urlopen(req, timeout=45) as response: 
                     audio_bytes = response.read()
+
+                # Prevenção Ativa Contra Erro 413: Mede o tamanho em MB antes de enviar para a API
+                tamanho_mb = len(audio_bytes) / (1024 * 1024)
+                if tamanho_mb > 25.0:
+                    print(f"   ⚠️ [PULANDO CHAMADA] O arquivo possui {tamanho_mb:.2f} MB excedendo o teto de 25MB da API.")
+                    continue
 
                 # 2. Transcrição com Whisper-Large-V3
                 transcription = client.audio.transcriptions.create(
@@ -217,7 +227,7 @@ def process_all_calls():
                 }}
                 """
                 chat1 = executar_chat_com_retentativa(
-                    model="llama-3.1-8b-instant",
+                    model=MODELO_RAPIDO,
                     messages=[{"role": "system", "content": prompt_agente1}, {"role": "user", "content": texto}],
                     response_format={"type": "json_object"}
                 )
@@ -241,7 +251,7 @@ def process_all_calls():
                 }}
                 """
                 chat2 = executar_chat_com_retentativa(
-                    model="llama-3.1-8b-instant",
+                    model=MODELO_RAPIDO,
                     messages=[{"role": "system", "content": prompt_agente2}, {"role": "user", "content": texto}],
                     response_format={"type": "json_object"}
                 )
@@ -249,7 +259,7 @@ def process_all_calls():
                 time.sleep(4)
 
                 # --------------------------------------------------
-                # AGENTE 3: O Diretor de Enablement (70B Versatile - Sem limites de corte)
+                # AGENTE 3: O Diretor de Enablement (Consolidador Técnico)
                 # --------------------------------------------------
                 print(" -> Executando Agente 3: Diagnóstico de Impacto e Feedbacks Imediatos...")
                 contexto_sintese = f"""
@@ -281,7 +291,7 @@ def process_all_calls():
                 }}
                 """
                 chat3 = executar_chat_com_retentativa(
-                    model="llama-3.1-70b-versatile",
+                    model=MODELO_PARERES,
                     messages=[
                         {"role": "system", "content": prompt_agente3},
                         {"role": "user", "content": f"Contexto dos Agentes:\n{contexto_sintese}\n\nTranscrição:\n{texto}"}
@@ -315,7 +325,7 @@ def process_all_calls():
                 time.sleep(5) 
 
             except Exception as e:
-                print(f"❌ Erro Crítico no ID {call_id}: {e}")
+                print(f"❌ Erro Crítico isolado no ID {call_id}: {e}")
                 traceback.print_exc()
                 time.sleep(4)
 
