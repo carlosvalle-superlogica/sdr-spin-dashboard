@@ -47,7 +47,6 @@
             <button onclick="switchTab('auditorias')" id="menu-auditorias" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium">
                 <i class="fa-solid fa-list-check w-5"></i> Histórico & Dossiês
             </button>
-            <!-- Restaurada a aba de Playbooks -->
             <button onclick="switchTab('playbooks')" id="menu-playbooks" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium">
                 <i class="fa-solid fa-book-open w-5"></i> Playbooks SPIN
             </button>
@@ -60,7 +59,12 @@
         <!-- Header e Filtros -->
         <div class="flex justify-between items-start mb-8 flex-shrink-0">
             <div>
-                <h1 id="page-title" class="text-3xl font-extrabold text-white tracking-tight">Visão Geral</h1>
+                <div class="flex items-center gap-3">
+                    <h1 id="page-title" class="text-3xl font-extrabold text-white tracking-tight">Visão Geral</h1>
+                    <div class="hidden md:flex bg-indigo-950/40 text-indigo-400 border border-indigo-900/60 px-3 py-1 rounded-full text-[10px] font-bold items-center gap-1.5 shadow-inner">
+                        <span class="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></span> Sincronizado
+                    </div>
+                </div>
                 <p class="text-sm text-gray-400 mt-1">Conformidade Operacional vs Técnica SPIN.</p>
             </div>
             <div class="flex gap-4">
@@ -68,7 +72,7 @@
                     <label class="text-[10px] uppercase text-gray-500 font-bold block mb-1">Período Analisado</label>
                     <div class="relative">
                         <i class="fa-solid fa-calendar-day absolute left-3 top-3 text-indigo-400"></i>
-                        <input type="text" id="date-range" class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg pl-9 p-2 text-sm focus:border-indigo-500 focus:outline-none cursor-pointer" placeholder="Selecione o período">
+                        <input type="text" id="date-range" class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg pl-9 p-2 text-sm focus:border-indigo-500 focus:outline-none cursor-pointer" placeholder="Todo o Histórico">
                     </div>
                 </div>
                 <div class="w-56">
@@ -82,43 +86,96 @@
 
         <!-- ABA: GERAL -->
         <div id="tab-geral" class="space-y-6">
+            <!-- KPIs -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="card-dark p-6 rounded-xl shadow-lg border-l-4 border-indigo-500">
+                <div class="card-dark p-6 rounded-xl shadow-lg border-l-4 border-indigo-500 relative overflow-hidden">
                     <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider block">Nota Média SPIN</span>
                     <h2 id="media-spin" class="text-4xl font-black text-white mt-2">0.0</h2>
+                    <i class="fa-solid fa-star absolute right-4 bottom-4 text-3xl text-gray-800/50"></i>
                 </div>
-                <div class="card-dark p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
-                    <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider block">Conformidade (Sonia)</span>
+                <div class="card-dark p-6 rounded-xl shadow-lg border-l-4 border-purple-500 relative overflow-hidden">
+                    <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider block">Conformidade</span>
                     <h2 id="media-op" class="text-4xl font-black text-white mt-2">0.0</h2>
+                    <i class="fa-solid fa-clipboard-check absolute right-4 bottom-4 text-3xl text-gray-800/50"></i>
                 </div>
-                <div class="card-dark p-6 rounded-xl shadow-lg border-l-4 border-emerald-500">
+                <div class="card-dark p-6 rounded-xl shadow-lg border-l-4 border-emerald-500 relative overflow-hidden">
                     <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider block">Ritmo de Fala (WPS)</span>
-                    <h2 id="media-wps" class="text-4xl font-black text-emerald-400 mt-2">0.0 <span class="text-sm font-medium text-gray-500">palavras/s</span></h2>
+                    <h2 id="media-wps" class="text-4xl font-black text-emerald-400 mt-2">0.0 <span class="text-sm font-medium text-gray-500">pal/s</span></h2>
+                    <i class="fa-solid fa-stopwatch absolute right-4 bottom-4 text-3xl text-gray-800/50"></i>
                 </div>
-                <div class="card-dark p-6 rounded-xl shadow-lg bg-rose-950/10 border border-rose-900/30">
+                <div class="card-dark p-6 rounded-xl shadow-lg bg-rose-950/10 border border-rose-900/30 relative overflow-hidden">
                     <span class="text-[10px] uppercase text-rose-400 font-bold tracking-wider block flex items-center gap-1.5">
                         <i class="fa-solid fa-triangle-exclamation"></i> Alertas de Urgência
                     </span>
                     <h2 id="casos-criticos" class="text-4xl font-black text-rose-500 mt-2">0</h2>
+                    <i class="fa-solid fa-fire absolute right-4 bottom-4 text-3xl text-rose-900/20"></i>
                 </div>
             </div>
 
+            <!-- Equipe -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6" id="grid-equipe"></div>
+
+            <!-- Alertas Críticos (Restaurado da V1) -->
+            <div class="card-dark p-6 rounded-xl mt-6 shadow-lg border border-gray-800">
+                <div class="flex justify-between items-center mb-5 border-b border-gray-800 pb-3">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-fire text-rose-500"></i> Alertas de Desempenho Crítico
+                    </h3>
+                    <span class="text-xs text-gray-400 font-medium bg-gray-900 px-3 py-1 rounded-full border border-gray-800">Contatos que necessitam de feedback imediato</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+                                <th class="pb-3">SDR Responsável</th>
+                                <th class="pb-3">Data</th>
+                                <th class="pb-3">Produto</th>
+                                <th class="pb-3">Motivo do Alerta</th>
+                                <th class="pb-3 text-right">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-criticos" class="text-sm divide-y divide-gray-800/60">
+                            <!-- Injetado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <!-- ABA: DASHBOARD -->
         <div id="tab-dash" class="hidden space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="col-span-1 card-dark p-6 rounded-xl shadow-lg flex flex-col items-center min-h-[400px]">
-                    <h3 class="text-sm font-bold text-white mb-4 self-start">
+                <!-- Radar Chart e Raio-X Restaurado -->
+                <div class="col-span-1 card-dark p-6 rounded-xl shadow-lg flex flex-col min-h-[400px]">
+                    <h3 class="text-sm font-bold text-white mb-4 self-start flex items-center">
                         <i class="fa-solid fa-chart-radar text-indigo-400 mr-2"></i>Aderência Metodológica (SPIN)
                     </h3>
-                    <div class="w-full flex-1 flex items-center justify-center max-w-[280px]">
+                    <div class="w-full flex-1 flex items-center justify-center max-w-[280px] mx-auto">
                         <canvas id="spiderChart"></canvas>
                     </div>
+                    <!-- Raio-X Operacional (Restaurado) -->
+                    <div class="w-full mt-6 space-y-2 border-t border-gray-800 pt-5">
+                        <div class="flex justify-between items-center text-xs p-2.5 bg-gray-900/50 rounded-lg border border-gray-800">
+                            <span class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Situação (S)</span>
+                            <span id="rx-s" class="text-white font-black text-sm">0.0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs p-2.5 bg-gray-900/50 rounded-lg border border-gray-800">
+                            <span class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Problema (P)</span>
+                            <span id="rx-p" class="text-white font-black text-sm">0.0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs p-2.5 bg-gray-900/50 rounded-lg border border-gray-800">
+                            <span class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Implicação (I)</span>
+                            <span id="rx-i" class="text-white font-black text-sm">0.0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs p-2.5 bg-gray-900/50 rounded-lg border border-gray-800">
+                            <span class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">Necessidade (N)</span>
+                            <span id="rx-n" class="text-white font-black text-sm">0.0</span>
+                        </div>
+                    </div>
                 </div>
+                <!-- Line Chart -->
                 <div class="col-span-2 card-dark p-6 rounded-xl shadow-lg min-h-[400px] flex flex-col">
-                    <h3 class="text-sm font-bold text-white mb-4">
+                    <h3 class="text-sm font-bold text-white mb-6 flex items-center">
                         <i class="fa-solid fa-arrow-trend-up text-purple-400 mr-2"></i>Evolução Temporal: Técnica vs Processo
                     </h3>
                     <div class="w-full flex-1 relative">
@@ -136,9 +193,9 @@
                         <tr class="border-b border-gray-800 text-gray-400 text-xs font-bold uppercase tracking-wider">
                             <th class="pb-3 pl-2">Data</th>
                             <th class="pb-3">SDR</th>
-                            <th class="pb-3">Produto</th>
+                            <th class="pb-3 text-center">Produto</th>
                             <th class="pb-3 text-center">Ritmo (WPS)</th>
-                            <th class="pb-3 text-center">Nota SPIN</th>
+                            <th class="pb-3 text-center">SPIN</th>
                             <th class="pb-3 text-center">Conformidade</th>
                             <th class="pb-3 text-right pr-2">Auditoria</th>
                         </tr>
@@ -148,51 +205,50 @@
             </div>
         </div>
 
-        <!-- ABA: PLAYBOOKS COMPLETO -->
+        <!-- ABA: PLAYBOOKS COMPLETA -->
         <div id="tab-playbooks" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="card-dark p-6 rounded-xl shadow-md">
-                <h3 class="text-lg font-black text-indigo-400 border-b border-gray-800 pb-2 mb-4 flex items-center gap-2"><i class="fa-solid fa-compass"></i> S - Perguntas de Situação</h3>
+            <div class="card-dark p-6 rounded-xl shadow-md border-t-4 border-indigo-500">
+                <h3 class="text-lg font-black text-indigo-400 border-b border-gray-800 pb-3 mb-4 flex items-center gap-2"><i class="fa-solid fa-compass"></i> S - Perguntas de Situação</h3>
                 <p class="text-gray-400 text-xs leading-relaxed mb-4">Utilizadas para coletar dados, fatos e entender o pano de fundo do lead. Não devem ser usadas em excesso para não tornar o contato cansativo.</p>
-                <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg text-xs space-y-2 text-gray-300 font-mono">
-                    <div>👉 "Qual ferramenta você utiliza hoje para gerenciar X?"</div>
-                    <div>👉 "Quantas pessoas compõem a sua equipe operacional atualmente?"</div>
-                    <div>👉 "Como está desenhado o seu processo atual de captação?"</div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg text-xs space-y-3 text-gray-300 font-mono">
+                    <div class="flex gap-2"><span class="text-indigo-400">👉</span> "Qual ferramenta você utiliza hoje para gerenciar a operação?"</div>
+                    <div class="flex gap-2"><span class="text-indigo-400">👉</span> "Quantas pessoas compõem a sua equipe comercial atualmente?"</div>
+                    <div class="flex gap-2"><span class="text-indigo-400">👉</span> "Como está desenhado o seu processo atual de captação?"</div>
                 </div>
             </div>
-            <div class="card-dark p-6 rounded-xl shadow-md">
-                <h3 class="text-lg font-black text-amber-400 border-b border-gray-800 pb-2 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-question"></i> P - Perguntas de Problema</h3>
+            <div class="card-dark p-6 rounded-xl shadow-md border-t-4 border-amber-500">
+                <h3 class="text-lg font-black text-amber-400 border-b border-gray-800 pb-3 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-question"></i> P - Perguntas de Problema</h3>
                 <p class="text-gray-400 text-xs leading-relaxed mb-4">Investigam dores, dificuldades ou insatisfações ocultas. É aqui que o lead começa a perceber que precisa de ajuda externa.</p>
-                <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg text-xs space-y-2 text-gray-300 font-mono">
-                    <div>👉 "Esse sistema atual costuma apresentar lentidão ou gargalos?"</div>
-                    <div>👉 "Qual é a sua maior queixa hoje em relação ao fornecedor atual?"</div>
-                    <div>👉 "Você sente que a equipe perde muito tempo executando Y?"</div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg text-xs space-y-3 text-gray-300 font-mono">
+                    <div class="flex gap-2"><span class="text-amber-400">👉</span> "Esse sistema atual costuma apresentar lentidão ou gargalos?"</div>
+                    <div class="flex gap-2"><span class="text-amber-400">👉</span> "Qual é a sua maior queixa hoje em relação ao fornecedor atual?"</div>
+                    <div class="flex gap-2"><span class="text-amber-400">👉</span> "Você sente que a equipe perde muito tempo executando tarefas manuais?"</div>
                 </div>
             </div>
-            <div class="card-dark p-6 rounded-xl shadow-md">
-                <h3 class="text-lg font-black text-rose-400 border-b border-gray-800 pb-2 mb-4 flex items-center gap-2"><i class="fa-solid fa-shuffle"></i> I - Perguntas de Implicação</h3>
+            <div class="card-dark p-6 rounded-xl shadow-md border-t-4 border-rose-500">
+                <h3 class="text-lg font-black text-rose-400 border-b border-gray-800 pb-3 mb-4 flex items-center gap-2"><i class="fa-solid fa-shuffle"></i> I - Perguntas de Implicação</h3>
                 <p class="text-gray-400 text-xs leading-relaxed mb-4">Exploram os efeitos e desdobramentos gerados pelos problemas. Transformam pequenas dores em problemas urgentes e caros.</p>
-                <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg text-xs space-y-2 text-gray-300 font-mono">
-                    <div>👉 "O atraso nessa entrega chega a impactar o seu faturamento no fim do mês?"</div>
-                    <div>👉 "Se esse erro continuar acontecendo, qual o prejuízo estimado para o trimestre?"</div>
-                    <div>👉 "Como essa dor reflete na motivação ou turnover da sua equipe?"</div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg text-xs space-y-3 text-gray-300 font-mono">
+                    <div class="flex gap-2"><span class="text-rose-400">👉</span> "O atraso nessa entrega chega a impactar o seu faturamento no fim do mês?"</div>
+                    <div class="flex gap-2"><span class="text-rose-400">👉</span> "Se esse erro continuar acontecendo, qual o prejuízo estimado para o trimestre?"</div>
+                    <div class="flex gap-2"><span class="text-rose-400">👉</span> "Como essa dor reflete na motivação ou turnover da sua equipe?"</div>
                 </div>
             </div>
-            <div class="card-dark p-6 rounded-xl shadow-md">
-                <h3 class="text-lg font-black text-emerald-400 border-b border-gray-800 pb-2 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> N - Necessidade de Solução</h3>
+            <div class="card-dark p-6 rounded-xl shadow-md border-t-4 border-emerald-500">
+                <h3 class="text-lg font-black text-emerald-400 border-b border-gray-800 pb-3 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> N - Necessidade de Solução</h3>
                 <p class="text-gray-400 text-xs leading-relaxed mb-4">Focam no valor, utilidade e nos benefícios práticos da resolução do problema. Fazem o próprio lead declarar a importância do seu produto.</p>
-                <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg text-xs space-y-2 text-gray-300 font-mono">
-                    <div>👉 "Se conseguíssemos reduzir esse tempo pela metade, o que mudaria na sua rotina?"</div>
-                    <div>👉 "Por que automatizar esse fluxo seria importante para a empresa hoje?"</div>
-                    <div>👉 "Qual seria o impacto de ter relatórios em tempo real para a diretoria?"</div>
+                <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg text-xs space-y-3 text-gray-300 font-mono">
+                    <div class="flex gap-2"><span class="text-emerald-400">👉</span> "Se conseguíssemos reduzir esse tempo pela metade, o que mudaria na rotina?"</div>
+                    <div class="flex gap-2"><span class="text-emerald-400">👉</span> "Por que automatizar esse fluxo seria importante para a empresa hoje?"</div>
+                    <div class="flex gap-2"><span class="text-emerald-400">👉</span> "Qual seria o impacto de ter relatórios em tempo real para a diretoria?"</div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- MODAL DOSSIÊ -->
     <div id="modal-sdr" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
-        <div class="bg-gray-900 border border-gray-800 w-full max-w-7xl rounded-2xl h-[90vh] flex flex-col shadow-2xl relative">
+        <div class="bg-gray-900 border border-gray-800 w-full max-w-7xl rounded-2xl h-[95vh] flex flex-col shadow-2xl relative">
             <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#111827] rounded-t-2xl flex-shrink-0 shadow-sm z-10">
                 <div>
                     <h2 id="modal-title" class="text-2xl font-extrabold text-white tracking-tight">Auditoria</h2>
@@ -218,39 +274,26 @@
         let spiderChart, lineChart;
         let picker;
 
-        // Inicialização Segura de Datas 
-        const duasSemanasAtras = new Date();
-        duasSemanasAtras.setDate(duasSemanasAtras.getDate() - 14);
-
         function initCalendario() {
             picker = flatpickr("#date-range", { 
                 mode: "range", 
                 dateFormat: "Y-m-d", 
                 locale: "pt", 
                 theme: "dark",
-                defaultDate: [duasSemanasAtras, new Date()],
                 onChange: applyFilters
             });
         }
 
         function switchTab(tab) {
             const tabs = ['geral', 'dash', 'auditorias', 'playbooks'];
-            
             tabs.forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
                 document.getElementById(`menu-${t}`).classList.remove('sidebar-active');
             });
-            
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             document.getElementById(`menu-${tab}`).classList.add('sidebar-active');
             
-            const titles = { 
-                geral: "Visão Geral", 
-                dash: "Dashboard Analytics", 
-                auditorias: "Histórico & Dossiês",
-                playbooks: "Playbooks SPIN"
-            };
-            
+            const titles = { geral: "Visão Geral", dash: "Dashboard Analytics", auditorias: "Histórico & Dossiês", playbooks: "Playbooks SPIN" };
             document.getElementById('page-title').innerText = titles[tab];
         }
 
@@ -259,25 +302,24 @@
             try {
                 const response = await fetch('consolidated_data.json?v=' + Date.now());
                 if (!response.ok) throw new Error("Ficheiro não encontrado");
-                database = await response.json();
+                
+                const textoData = await response.text();
+                if(textoData.trim() === "" || textoData.trim() === "{}") {
+                    throw new Error("Base de dados vazia");
+                }
+                
+                database = JSON.parse(textoData);
                 
                 const sdrs = new Set();
                 Object.values(database).forEach(c => { if(c.sdr) sdrs.add(c.sdr.trim()); });
                 const sel = document.getElementById('filter-sdr');
-                Array.from(sdrs).sort().forEach(s => {
-                    sel.innerHTML += `<option value="${s}">${s}</option>`;
-                });
+                Array.from(sdrs).sort().forEach(s => { sel.innerHTML += `<option value="${s}">${s}</option>`; });
                 
                 applyFilters();
             } catch (e) { 
-                console.error("Aguardando dados iniciais...", e);
-                document.getElementById('tabela-historico').innerHTML = `
-                    <tr>
-                        <td colspan="7" class="py-6 text-center text-gray-500">
-                            Aguardando a primeira execução do robô para popular os dados.
-                        </td>
-                    </tr>
-                `;
+                console.error("Aguardando dados...", e);
+                document.getElementById('tabela-historico').innerHTML = `<tr><td colspan="7" class="py-6 text-center text-gray-500">Sem dados. Por favor, processe as chamadas na Action do GitHub.</td></tr>`;
+                document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-500">Nenhum dado processado.</td></tr>`;
             }
         }
 
@@ -290,21 +332,12 @@
                 
                 if (dates.length === 2 && c.data) {
                     try {
-                        let dataStr = c.data.split(' ')[0]; // Pega só a data
+                        let dataStr = c.data.split(' ')[0];
                         let partes = dataStr.includes('/') ? dataStr.split('/') : dataStr.split('-');
-                        let cDate;
-                        // Tenta descobrir se é YYYY-MM-DD ou DD-MM-YYYY
-                        if(partes[0].length === 4) {
-                            cDate = new Date(partes[0], partes[1]-1, partes[2]);
-                        } else {
-                            cDate = new Date(partes[2], partes[1]-1, partes[0]);
-                        }
-                        
-                        // Zera as horas para comparar apenas os dias exatos
+                        let cDate = partes[0].length === 4 ? new Date(partes[0], partes[1]-1, partes[2]) : new Date(partes[2], partes[1]-1, partes[0]);
                         cDate.setHours(0,0,0,0);
                         const dStart = new Date(dates[0]); dStart.setHours(0,0,0,0);
                         const dEnd = new Date(dates[1]); dEnd.setHours(23,59,59,999);
-                        
                         if (cDate < dStart || cDate > dEnd) return false;
                     } catch(e){}
                 }
@@ -317,12 +350,15 @@
         }
 
         function renderGeral(dados) {
-            if(!dados.length) {
+            const tbCriticos = document.getElementById('tabela-criticos');
+            
+            if(!dados || dados.length === 0) {
                 document.getElementById('media-spin').innerText = "0.0";
                 document.getElementById('media-op').innerText = "0.0";
                 document.getElementById('media-wps').innerText = "0.0";
                 document.getElementById('casos-criticos').innerText = "0";
                 document.getElementById('grid-equipe').innerHTML = "";
+                tbCriticos.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-500">Nenhum dado encontrado para este filtro.</td></tr>`;
                 return;
             }
             
@@ -330,20 +366,18 @@
             const sumS = dados.reduce((a,c)=>a+(parseFloat(c.nota_spin)||0),0)/t;
             const sumO = dados.reduce((a,c)=>a+(parseFloat(c.nota_op)||0),0)/t;
             const sumW = dados.reduce((a,c)=>a+(parseFloat(c.wps)||0),0)/t;
-            const criticos = dados.filter(c => c.urgencia === "SIM").length;
-
+            
+            // Urgências Críticas
+            const listaCriticos = dados.filter(c => c.urgencia === "SIM").sort((a,b) => new Date(b.data.split(' ')[0]) - new Date(a.data.split(' ')[0]));
+            
             document.getElementById('media-spin').innerText = sumS.toFixed(1);
             document.getElementById('media-op').innerText = sumO.toFixed(1);
             document.getElementById('media-wps').innerText = sumW.toFixed(2);
-            document.getElementById('casos-criticos').innerText = criticos;
+            document.getElementById('casos-criticos').innerText = listaCriticos.length;
 
             // Renderiza Cards da Equipe
             const dictSDR = {};
-            dados.forEach(c => { 
-                dictSDR[c.sdr] = dictSDR[c.sdr] || []; 
-                dictSDR[c.sdr].push(c); 
-            });
-            
+            dados.forEach(c => { dictSDR[c.sdr] = dictSDR[c.sdr] || []; dictSDR[c.sdr].push(c); });
             const grid = document.getElementById('grid-equipe');
             grid.innerHTML = "";
             
@@ -355,118 +389,98 @@
                 grid.innerHTML += `
                     <div class="card-dark p-5 rounded-xl shadow hover:border-indigo-500/50 transition cursor-pointer" onclick="document.getElementById('filter-sdr').value='${nome}'; applyFilters();">
                         <div class="flex items-center gap-3 mb-4">
-                            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow">
-                                ${nome.substring(0,2).toUpperCase()}
-                            </div>
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow">${nome.substring(0,2).toUpperCase()}</div>
                             <h4 class="font-bold text-white text-sm">${nome}</h4>
                         </div>
                         <div class="grid grid-cols-2 gap-2 text-center">
-                            <div class="bg-gray-900/50 rounded p-2">
-                                <span class="text-[9px] text-gray-500 uppercase block font-bold">SPIN</span>
-                                <span class="text-lg font-black text-indigo-400">${mSpin.toFixed(1)}</span>
-                            </div>
-                            <div class="bg-gray-900/50 rounded p-2">
-                                <span class="text-[9px] text-gray-500 uppercase block font-bold">Operacional</span>
-                                <span class="text-lg font-black text-purple-400">${mOp.toFixed(1)}</span>
-                            </div>
+                            <div class="bg-gray-900/50 rounded p-2"><span class="text-[9px] text-gray-500 uppercase block font-bold">SPIN</span><span class="text-lg font-black text-indigo-400">${mSpin.toFixed(1)}</span></div>
+                            <div class="bg-gray-900/50 rounded p-2"><span class="text-[9px] text-gray-500 uppercase block font-bold">Conformidade</span><span class="text-lg font-black text-purple-400">${mOp.toFixed(1)}</span></div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             });
+
+            // Tabela Críticos (Visão Geral)
+            tbCriticos.innerHTML = '';
+            if(listaCriticos.length === 0) {
+                tbCriticos.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-emerald-500/80 font-medium">Nenhum alerta crítico no período! Excelente!</td></tr>`;
+            } else {
+                listaCriticos.forEach(c => {
+                    let motivo = "Baixa Conformidade";
+                    if(c.nota_op === 0) motivo = "Erro Fatal na Regra";
+                    else if(c.nota_spin <= 5.0) motivo = "SPIN Crítico";
+                    
+                    tbCriticos.innerHTML += `
+                        <tr class="hover:bg-gray-800/40 transition">
+                            <td class="py-4 font-bold text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-500"></span> ${c.sdr}</td>
+                            <td class="py-4 text-gray-400">${c.data}</td>
+                            <td class="py-4"><span class="bg-gray-800 px-2 py-1 rounded text-[10px] uppercase font-bold text-gray-300">${c.produto}</span></td>
+                            <td class="py-4 text-rose-400 font-semibold">${motivo}</td>
+                            <td class="py-4 text-right pr-2"><button onclick="abrirDossie('${c.id}')" class="text-indigo-400 font-bold hover:text-white transition bg-indigo-900/20 px-3 py-1.5 rounded-lg border border-indigo-500/20 hover:bg-indigo-600">Revisar</button></td>
+                        </tr>
+                    `;
+                });
+            }
         }
 
         function renderCharts(dados) {
             let S=0, P=0, I=0, N=0;
-            if(dados.length) {
-                S = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.s)||0),0)/dados.length;
-                P = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.p)||0),0)/dados.length;
-                I = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.i)||0),0)/dados.length;
-                N = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.n)||0),0)/dados.length;
+            if(dados && dados.length > 0) {
+                S = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.s || 0)),0)/dados.length;
+                P = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.p || 0)),0)/dados.length;
+                I = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.i || 0)),0)/dados.length;
+                N = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.n || 0)),0)/dados.length;
             }
+            
             if(spiderChart) spiderChart.destroy();
             spiderChart = new Chart(document.getElementById('spiderChart'), {
                 type: 'radar',
                 data: { 
-                    labels: ['S (Situação)', 'P (Problema)', 'I (Implicação)', 'N (Necessidade)'], 
-                    datasets: [{ 
-                        data: [S, P, I, N], 
-                        backgroundColor: 'rgba(99,102,241,0.2)', 
-                        borderColor: '#6366f1', 
-                        pointBackgroundColor: '#818cf8', 
-                        borderWidth: 2 
-                    }] 
+                    labels: ['S', 'P', 'I', 'N'], 
+                    datasets: [{ data: [S, P, I, N], backgroundColor: 'rgba(99,102,241,0.2)', borderColor: '#6366f1', pointBackgroundColor: '#818cf8', borderWidth: 2 }] 
                 },
                 options: { 
-                    scales: { 
-                        r: { 
-                            min: 0, 
-                            max: 10, 
-                            angleLines: {color: '#1f2937'}, 
-                            grid: {color: '#1f2937'}, 
-                            pointLabels: {color: '#9ca3af', font: {size: 11, weight: 'bold'}} 
-                        } 
-                    }, 
+                    scales: { r: { min: 0, max: 10, angleLines: {color: '#1f2937'}, grid: {color: '#1f2937'}, pointLabels: {color: '#9ca3af', font: {size: 11, weight: 'bold'}} } }, 
                     plugins: { legend: {display: false} } 
                 }
             });
 
-            // Ordena dados por data (do mais antigo para o mais recente para a linha de evolução)
+            // Atualiza Numerais do Raio-X
+            document.getElementById('rx-s').innerText = S.toFixed(1);
+            document.getElementById('rx-p').innerText = P.toFixed(1);
+            document.getElementById('rx-i').innerText = I.toFixed(1);
+            document.getElementById('rx-n').innerText = N.toFixed(1);
+
             const dadosCronologicos = [...dados].sort((a,b) => new Date(a.data.split(' ')[0]) - new Date(b.data.split(' ')[0]));
-            
             const labels = dadosCronologicos.map(c => c.data.split(' ')[0]);
-            const n_spin = dadosCronologicos.map(c => c.nota_spin);
-            const n_op = dadosCronologicos.map(c => c.nota_op);
+            const n_spin = dadosCronologicos.map(c => parseFloat(c.nota_spin) || 0);
+            const n_op = dadosCronologicos.map(c => parseFloat(c.nota_op) || 0);
             
             if(lineChart) lineChart.destroy();
             lineChart = new Chart(document.getElementById('lineChart'), {
                 type: 'line',
-                data: { 
-                    labels, 
-                    datasets: [
-                        { label: 'Nota SPIN', data: n_spin, borderColor: '#6366f1', backgroundColor: '#6366f1', tension: 0.3, borderWidth: 2, pointRadius: 3 },
-                        { label: 'Nota Operacional', data: n_op, borderColor: '#a855f7', backgroundColor: '#a855f7', tension: 0.3, borderWidth: 2, pointRadius: 3 }
-                    ]
-                },
-                options: { 
-                    maintainAspectRatio: false, 
-                    scales: { 
-                        y: { min: 0, max: 10, grid: {color: '#1f2937'} }, 
-                        x: { grid: {color: '#1f2937'}, ticks: {display: false} } 
-                    },
-                    plugins: { legend: { position: 'bottom', labels: {color: '#9ca3af', boxWidth: 12} } }
-                }
+                data: { labels, datasets: [
+                    { label: 'SPIN', data: n_spin, borderColor: '#6366f1', backgroundColor: '#6366f1', tension: 0.3, borderWidth: 2, pointRadius: 3 },
+                    { label: 'Conformidade', data: n_op, borderColor: '#a855f7', backgroundColor: '#a855f7', tension: 0.3, borderWidth: 2, pointRadius: 3 }
+                ]},
+                options: { maintainAspectRatio: false, scales: { y: { min: 0, max: 10, grid: {color: '#1f2937'} }, x: { grid: {color: '#1f2937'}, ticks: {display: false} } }, plugins: { legend: { position: 'bottom', labels: {color: '#9ca3af', boxWidth: 12} } } }
             });
         }
 
         function renderTabela(dados) {
-            const tb = document.getElementById('tabela-historico'); 
-            tb.innerHTML = '';
-            
-            if(!dados.length) { 
-                tb.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-gray-500">Nenhum registo encontrado no período selecionado.</td></tr>`; 
-                return; 
-            }
+            const tb = document.getElementById('tabela-historico'); tb.innerHTML = '';
+            if(!dados || dados.length === 0) { tb.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-gray-500">Sem registos no período.</td></tr>`; return; }
 
             dados.sort((a,b)=>b.id - a.id).forEach(c => {
-                const wColor = c.wps < 1.5 || c.wps > 2.5 ? 'text-amber-400' : 'text-emerald-400';
+                const wColor = (c.wps||0) < 1.5 || (c.wps||0) > 2.5 ? 'text-amber-400' : 'text-emerald-400';
                 tb.innerHTML += `
                 <tr class="border-b border-gray-800/50 hover:bg-gray-800/30 transition text-xs">
                     <td class="py-3.5 pl-2 text-gray-400 font-mono">${c.data}</td>
-                    <td class="py-3.5 font-bold text-white flex items-center gap-2">
-                        ${c.urgencia==="SIM"?'<i class="fa-solid fa-fire text-rose-500" title="Alerta Crítico"></i>':''}
-                        ${c.sdr}
-                    </td>
-                    <td class="py-3.5"><span class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-gray-300 font-semibold">${c.produto}</span></td>
-                    <td class="py-3.5 text-center font-mono font-bold ${wColor}">${parseFloat(c.wps).toFixed(2)}</td>
-                    <td class="py-3.5 text-center">
-                        <span class="px-2 py-0.5 rounded bg-indigo-950/30 text-indigo-400 border border-indigo-900/50 font-bold">${parseFloat(c.nota_spin).toFixed(1)}</span>
-                    </td>
-                    <td class="py-3.5 text-center">
-                        <span class="px-2 py-0.5 rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 font-bold">${parseFloat(c.nota_op).toFixed(1)}</span>
-                    </td>
-                    <td class="py-3.5 text-right pr-2">
-                        <button onclick="abrirDossie('${c.id}')" class="text-indigo-400 font-bold hover:text-white transition">Análise</button>
-                    </td>
+                    <td class="py-3.5 font-bold text-white flex items-center gap-2">${c.urgencia==="SIM"?'<i class="fa-solid fa-fire text-rose-500" title="Alerta"></i>':''}${c.sdr}</td>
+                    <td class="py-3.5 text-center"><span class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-gray-300 font-semibold">${c.produto}</span></td>
+                    <td class="py-3.5 text-center font-mono font-bold ${wColor}">${parseFloat(c.wps||0).toFixed(2)}</td>
+                    <td class="py-3.5 text-center"><span class="px-2 py-0.5 rounded bg-indigo-950/30 text-indigo-400 border border-indigo-900/50 font-bold">${parseFloat(c.nota_spin||0).toFixed(1)}</span></td>
+                    <td class="py-3.5 text-center"><span class="px-2 py-0.5 rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 font-bold">${parseFloat(c.nota_op||0).toFixed(1)}</span></td>
+                    <td class="py-3.5 text-right pr-2"><button onclick="abrirDossie('${c.id}')" class="bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-3 py-1 rounded hover:bg-indigo-600 hover:text-white transition font-bold">Analisar</button></td>
                 </tr>`;
             });
         }
@@ -477,9 +491,7 @@
             return '<span class="badge-na px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider">N/A</span>';
         }
 
-        function fecharModal() {
-            document.getElementById('modal-sdr').classList.add('hidden');
-        }
+        function fecharModal() { document.getElementById('modal-sdr').classList.add('hidden'); }
 
         function abrirDossie(id) {
             const c = database[id];
@@ -487,95 +499,69 @@
             document.getElementById('modal-subtitle').innerText = `ID: ${c.id} | Produto: ${c.produto} | Duração: ${c.duracao}`;
             
             document.getElementById('modal-links').innerHTML = `
-                ${c.deal_url ? `<a href="${c.deal_url}" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white text-xs px-3 py-2 rounded-lg border border-gray-700 transition font-bold shadow"><i class="fa-solid fa-arrows-spin mr-1"></i> Negócio</a>` : ''}
-                <a href="${c.audio_url}" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg transition font-bold shadow"><i class="fa-solid fa-play mr-1"></i> HubSpot</a>
+                ${c.deal_url ? `<a href="${c.deal_url}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-2 rounded-lg transition font-bold shadow flex items-center gap-2"><i class="fa-solid fa-briefcase"></i> Negócio</a>` : ''}
+                <a href="${c.audio_url}" target="_blank" class="bg-[#ff7a59] hover:bg-[#ff8f73] text-white text-xs px-3 py-2 rounded-lg transition font-bold shadow flex items-center gap-2"><i class="fa-solid fa-headphones"></i> Gravação</a>
             `;
 
             let f = c.formulario || {};
             const itemHTML = (label, obj) => `
                 <div class="bg-gray-900/50 border border-gray-800 p-3 rounded-xl mb-2 hover:border-gray-700 transition">
-                    <div class="flex justify-between items-start mb-1.5">
-                        <span class="text-xs font-bold text-gray-300 leading-tight">${label}</span>
-                        ${getBadge(obj?.r)}
-                    </div>
+                    <div class="flex justify-between items-start mb-1.5"><span class="text-xs font-bold text-gray-300 leading-tight">${label}</span>${getBadge(obj?.r)}</div>
                     ${obj?.e && obj?.e !== "..." ? `<p class="text-[10px] text-gray-500 italic border-l-2 border-gray-700 pl-2 mt-2 leading-relaxed">"${obj.e}"</p>` : ''}
                 </div>`;
             
             document.getElementById('modal-matriz').innerHTML = `
-                <div class="mb-8">
-                    <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-ear-listen"></i> Escuta & Adaptação
-                    </h3>
-                    ${itemHTML('Escuta Ativa', f.escuta)}
-                    ${itemHTML('Validação', f.validacao)}
-                    ${itemHTML('Compreensão', f.compreensao)}
-                    ${itemHTML('Contorno de Objeções', f.objecoes)}
-                </div>
+                <div class="mb-8"><h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-ear-listen"></i> Escuta & Adaptação</h3>
+                ${itemHTML('Escuta Ativa', f.escuta)}${itemHTML('Validação', f.validacao)}${itemHTML('Compreensão', f.compreensao)}${itemHTML('Contorno de Objeções', f.objecoes)}</div>
                 
-                <div class="mb-8">
-                    <h3 class="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-comments"></i> Comunicação
-                    </h3>
-                    ${itemHTML('Linguagem/Vícios', f.linguagem)}
-                    ${itemHTML('Receptividade', f.receptividade)}
-                    ${itemHTML('Rapport', f.rapport)}
-                    ${itemHTML('Discurso e Tom', f.discurso)}
-                    ${itemHTML('Clareza', f.clareza)}
-                </div>
+                <div class="mb-8"><h3 class="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-comments"></i> Comunicação</h3>
+                ${itemHTML('Linguagem/Vícios', f.linguagem)}${itemHTML('Receptividade', f.receptividade)}${itemHTML('Rapport', f.rapport)}${itemHTML('Discurso e Tom', f.discurso)}${itemHTML('Clareza', f.clareza)}</div>
                 
-                <div>
-                    <h3 class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <i class="fa-solid fa-check-double"></i> Regras (${c.produto})
-                    </h3>
-                    ${itemHTML('Coleta de SLA', f.sla)}
-                    ${itemHTML('SPIN (3 etapas)', f.spin)}
-                    ${itemHTML('Uso da Dor', f.dor)}
-                    ${itemHTML('Gestão/Preço', f.gestao)}
-                    ${itemHTML('Passos RO (Computador)', f.passos_ro)}
-                    ${itemHTML('Venda do Produto', f.produto)}
-                    ${itemHTML('Gatilhos Mentais', f.gatilhos)}
-                </div>
+                <div><h3 class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-2"><i class="fa-solid fa-check-double"></i> Regras de Ouro (${c.produto})</h3>
+                ${itemHTML('Coleta de SLA', f.sla)}${itemHTML('SPIN (3 etapas)', f.spin)}${itemHTML('Uso da Dor', f.dor)}${itemHTML('Gestão/Preço', f.gestao)}${itemHTML('Passos RO (Computador)', f.passos_ro)}${itemHTML('Venda do Produto', f.produto)}${itemHTML('Gatilhos Mentais', f.gatilhos)}</div>
             `;
 
             document.getElementById('modal-tecnico').innerHTML = `
                 <div class="grid grid-cols-3 gap-4 mb-6">
                     <div class="bg-indigo-950/20 border border-indigo-900/30 p-4 rounded-xl text-center shadow-inner">
                         <span class="text-[10px] font-black tracking-widest text-indigo-400 uppercase block mb-1">Aderência SPIN</span>
-                        <span class="text-3xl font-black text-white">${parseFloat(c.nota_spin).toFixed(1)}</span>
+                        <span class="text-3xl font-black text-white">${parseFloat(c.nota_spin||0).toFixed(1)}</span>
                     </div>
                     <div class="bg-purple-950/20 border border-purple-900/30 p-4 rounded-xl text-center shadow-inner">
-                        <span class="text-[10px] font-black tracking-widest text-purple-400 uppercase block mb-1">Matriz Sonia</span>
-                        <span class="text-3xl font-black text-white">${parseFloat(c.nota_op).toFixed(1)}</span>
+                        <span class="text-[10px] font-black tracking-widest text-purple-400 uppercase block mb-1">Conformidade</span>
+                        <span class="text-3xl font-black text-white">${parseFloat(c.nota_op||0).toFixed(1)}</span>
                     </div>
                     <div class="bg-emerald-950/20 border border-emerald-900/30 p-4 rounded-xl text-center shadow-inner">
                         <span class="text-[10px] font-black tracking-widest text-emerald-400 uppercase block mb-1">Ritmo (WPS)</span>
-                        <span class="text-3xl font-black text-white">${parseFloat(c.wps).toFixed(2)}</span>
+                        <span class="text-3xl font-black text-white">${parseFloat(c.wps||0).toFixed(2)}</span>
                     </div>
                 </div>
                 
-                <div class="space-y-3 mb-6">
-                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                        <i class="fa-solid fa-gavel text-indigo-400"></i> Parecer do Auditor Técnico
+                <div class="bg-gray-800/40 border border-gray-700/60 rounded-xl p-6 mb-6 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-indigo-500"></div>
+                    <h4 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2 mb-4 border-b border-gray-700 pb-3">
+                        <i class="fa-solid fa-gavel text-indigo-400 text-lg"></i> Feedback e Parecer Técnico
                     </h4>
-                    <div class="bg-gray-900 border border-gray-800 p-5 rounded-xl text-xs text-gray-300 whitespace-pre-line leading-relaxed shadow-inner font-medium">
-                        ${c.parecer || 'Sem parecer gerado.'}
+                    <div class="text-sm text-gray-300 whitespace-pre-line leading-relaxed font-medium">
+                        ${c.parecer || 'Ainda não foi gerado um parecer técnico para esta chamada.'}
                     </div>
                 </div>
                 
-                <div class="space-y-3 mb-6">
-                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
-                        <i class="fa-solid fa-bullseye text-rose-400"></i> Plano de Ação & Desvios
+                <div class="bg-rose-950/20 border border-rose-900/40 rounded-xl p-6 mb-6 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
+                    <h4 class="text-xs font-black text-rose-300 uppercase tracking-widest flex items-center gap-2 mb-4 border-b border-rose-900/50 pb-3">
+                        <i class="fa-solid fa-bullseye text-rose-500 text-lg"></i> Plano de Ação e Desvios
                     </h4>
-                    <div class="bg-rose-950/10 border border-rose-900/30 p-5 rounded-xl text-xs text-rose-100/90 whitespace-pre-line leading-relaxed shadow-inner font-medium">
-                        ${c.sugestoes || 'Sem plano traçado.'}
+                    <div class="text-sm text-rose-100/90 whitespace-pre-line leading-relaxed font-medium">
+                        ${c.sugestoes || 'Sem pontos de ação traçados.'}
                     </div>
                 </div>
                 
-                <div class="space-y-3 mt-8 border-t border-gray-800 pt-6">
+                <div class="space-y-3 mt-8 pt-4">
                     <h4 class="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-2">
-                        <i class="fa-solid fa-file-lines"></i> Transcrição Original
+                        <i class="fa-solid fa-file-lines"></i> Transcrição da Chamada
                     </h4>
-                    <div class="bg-gray-900/50 border border-gray-800 p-5 rounded-xl text-[11px] text-gray-500 h-48 overflow-y-auto custom-scrollbar leading-relaxed whitespace-pre-line">
+                    <div class="bg-gray-900/50 border border-gray-800 p-5 rounded-xl text-[11px] text-gray-500 h-56 overflow-y-auto custom-scrollbar leading-relaxed whitespace-pre-line">
                         ${c.transcricao}
                     </div>
                 </div>
