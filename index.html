@@ -3,324 +3,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDR Dashboard - Auditoria SPIN Selling</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>SDR Auditor - Inteligência de Vendas</title>
+    <script src="[https://tailwindcss.com](https://tailwindcss.com)"></script>
+    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
     <style>
-        body { background-color: #0f172a; color: #e2e8f0; font-family: 'Inter', system-ui, sans-serif; }
-        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); padding: 1.5rem; transition: transform 0.2s; }
-        .card:hover { border-color: #475569; }
-        
-        /* Sistema de Cores Automático */
-        .borda-vermelho { border-left: 6px solid #ef4444; }
-        .borda-amarelo { border-left: 6px solid #f59e0b; }
-        .borda-verde { border-left: 6px solid #10b981; }
-        .borda-azul { border-left: 6px solid #3b82f6; }
-        
-        .script-box { background-color: #0f172a; border-left: 3px solid #3b82f6; padding: 1rem; border-radius: 0.5rem; font-style: italic; }
+        body { background-color: #0b0f19; color: #f3f4f6; font-family: 'Inter', sans-serif; }
+        .sidebar-active { background: linear-gradient(90deg, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0) 100%); border-left: 4px solid #6366f1; color: #ffffff; }
+        .card-dark { background-color: #111827; border: 1px solid #1f2937; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #111827; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
     </style>
 </head>
-<body class="p-4 md:p-10">
-    <div class="max-w-7xl mx-auto">
-        
-        <header class="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-slate-700 pb-6">
-            <div>
-                <h1 class="text-3xl font-extrabold text-white tracking-tight">🎙️ Auditoria de SDRs</h1>
-                <p class="text-blue-400 mt-1 font-medium">Inteligência de Vendas & SPIN Selling</p>
-            </div>
-            <div id="status-box" class="mt-4 md:mt-0 px-4 py-2 bg-slate-800 rounded-full text-sm font-semibold border border-slate-600 flex items-center gap-2">
-                <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span></span>
-                Carregando dados na nuvem...
-            </div>
-        </header>
+<body class="flex h-screen overflow-hidden">
 
-        <div id="tela-espera" class="text-center mt-20 block">
-            <h2 class="text-2xl font-bold text-slate-300">O Robô está analisando as ligações ⚙️</h2>
-            <p class="text-slate-500 mt-4 max-w-lg mx-auto">A Inteligência Artificial está processando os áudios. Esta página exibirá os gráficos assim que o banco de dados for atualizado na nuvem.</p>
+    <div class="w-64 card-dark h-full flex flex-col justify-between p-4 border-r border-gray-800">
+        <div>
+            <div class="flex items-center gap-3 px-2 py-4 border-b border-gray-800 mb-6">
+                <div class="bg-indigo-600 p-2 rounded-lg text-white font-bold text-xl flex items-center justify-center w-10 h-10">S</div>
+                <span class="text-lg font-bold tracking-wide text-white">SDR Auditor</span>
+            </div>
+            <nav class="space-y-1">
+                <button onclick="switchTab('geral')" id="menu-geral" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition sidebar-active">
+                    <i class="fa-solid fa-chart-pie w-5"></i> Visão Geral
+                </button>
+                <button onclick="switchTab('equipe')" id="menu-equipe" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-users w-5"></i> Equipe SDR
+                </button>
+                <button onclick="switchTab('instrucoes')" id="menu-instrucoes" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-circle-info w-5"></i> Documentação
+                </button>
+            </nav>
+        </div>
+        <div class="text-xs text-gray-500 border-t border-gray-800 pt-4 text-center">
+            SDR Audit System v1.2<br><span class="text-indigo-400">Google Workspace</span>
+        </div>
+    </div>
+
+    <div class="flex-1 flex flex-col overflow-y-auto p-8 custom-scrollbar">
+        
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 id="page-title" class="text-3xl font-bold text-white">Visão Geral</h1>
+                <p id="page-subtitle" class="text-sm text-gray-400 mt-1">Consolidação do processo de vendas corporativo.</p>
+            </div>
+            <div class="bg-emerald-950/50 text-emerald-400 border border-emerald-800 px-4 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2">
+                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> Sistema Operacional
+            </div>
         </div>
 
-        <div id="dashboard-conteudo" class="hidden">
+        <div id="tab-geral" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card-dark p-6 rounded-xl shadow-lg">
+                    <span class="text-xs uppercase text-gray-400 font-semibold tracking-wider">Nota Média (Empresa)</span>
+                    <h2 id="media-geral" class="text-4xl font-extrabold text-white mt-2">--</h2>
+                </div>
+                <div class="card-dark p-6 rounded-xl shadow-lg">
+                    <span class="text-xs uppercase text-gray-400 font-semibold tracking-wider">Auditorias Realizadas</span>
+                    <h2 id="total-ligacoes" class="text-4xl font-extrabold text-indigo-400 mt-2">--</h2>
+                </div>
+                <div class="card-dark p-6 rounded-xl shadow-lg">
+                    <span class="text-xs uppercase text-gray-400 font-semibold tracking-wider">Atenção Crítica (< 6)</span>
+                    <h2 id="casos-criticos" class="text-4xl font-extrabold text-rose-500 mt-2">--</h2>
+                </div>
+            </div>
             
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-lg">
-                <div class="flex flex-col">
-                    <label class="text-xs text-slate-400 mb-1 uppercase tracking-wider font-bold">Ano</label>
-                    <select id="filtro-ano" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg outline-none focus:border-blue-500 transition-colors"></select>
+            <div class="card-dark p-6 rounded-xl">
+                <h3 class="text-lg font-bold text-white mb-4">Registro Geral de Chamadas Atendidas</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-800 text-gray-400 text-sm">
+                                <th class="pb-3">Representante SDR</th>
+                                <th class="pb-3">Data e Hora</th>
+                                <th class="pb-3">Duração</th>
+                                <th class="pb-3">Nota Global</th>
+                                <th class="pb-3 text-right">Análise Completa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabela-criticos" class="text-sm divide-y divide-gray-800">
+                            <tr><td colspan="5" class="py-4 text-center text-gray-500">A processar dados...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="flex flex-col">
-                    <label class="text-xs text-slate-400 mb-1 uppercase tracking-wider font-bold">Mês</label>
-                    <select id="filtro-mes" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg outline-none focus:border-blue-500 transition-colors"></select>
-                </div>
-                <div class="flex flex-col">
-                    <label class="text-xs text-slate-400 mb-1 uppercase tracking-wider font-bold">SDR Analisado</label>
-                    <select id="filtro-sdr" class="bg-slate-900 border border-slate-600 text-white p-2 rounded-lg outline-none focus:border-blue-500 transition-colors"></select>
+            </div>
+        </div>
+
+        <div id="tab-equipe" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 items-start"></div>
+
+        <div id="tab-instrucoes" class="hidden card-dark p-6 rounded-xl space-y-4">
+            <h3 class="text-xl font-bold text-white">Sobre o Sistema de Auditoria</h3>
+            <p class="text-gray-400 text-sm leading-relaxed">
+                Este sistema utiliza a integração entre <strong>HubSpot</strong> e a inteligência artificial do modelo <strong>Llama-3 via Groq API</strong>. O robô faz o download da ligação original, converte em texto usando tecnologia Whisper (Zero-Shot Translation) e audita o comportamento do vendedor baseado exclusivamente nas 4 etapas metodológicas do <strong>SPIN Selling</strong> (Situação, Problema, Implicação e Necessidade).
+            </p>
+        </div>
+    </div>
+
+    <div id="modal-sdr" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 z-50 transition-opacity">
+        <div class="bg-gray-900 border border-gray-800 w-full max-w-6xl rounded-2xl h-[85vh] flex flex-col shadow-2xl relative">
+            <div id="modal-loader" class="hidden absolute inset-0 bg-gray-900/90 z-10 flex items-center justify-center rounded-2xl">
+                <div class="text-indigo-400 flex flex-col items-center">
+                    <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-3"></i>
+                    <span class="text-sm font-semibold tracking-widest uppercase">Carregando Dados...</span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="card flex flex-col items-center justify-center bg-slate-800/50">
-                    <h3 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Nota Média Geral</h3>
-                    <span id="kpi-nota" class="text-4xl font-black text-white mt-2">-</span>
+            <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900 rounded-t-2xl">
+                <div>
+                    <h2 id="modal-sdr-name" class="text-2xl font-bold text-white tracking-tight">Nome do SDR</h2>
+                    <p class="text-xs text-indigo-400 uppercase tracking-wider font-bold mt-1">Dossiê de Auditoria Comercial</p>
                 </div>
-                <div class="card flex flex-col items-center justify-center bg-slate-800/50">
-                    <h3 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total de Ligações</h3>
-                    <span id="kpi-chamadas" class="text-4xl font-black text-blue-400 mt-2">-</span>
-                </div>
-                <div class="card flex flex-col items-center justify-center bg-slate-800/50">
-                    <h3 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Ritmo Médio (WPS)</h3>
-                    <span id="kpi-wps" class="text-4xl font-black text-white mt-2">-</span>
-                </div>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-white hover:bg-gray-800 p-2 rounded-xl transition duration-200">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-                <div class="card flex flex-col items-center justify-center">
-                    <h2 class="text-xl font-bold text-white mb-2 w-full">Domínio da Metodologia SPIN</h2>
-                    <p class="text-sm text-slate-400 mb-4 w-full">Média das pontuações técnicas nas etapas de investigação.</p>
-                    <div class="w-full max-w-xs md:max-w-sm">
-                        <canvas id="spinRadarChart"></canvas>
-                    </div>
-                </div>
+            
+            <div class="flex-1 flex overflow-hidden">
+                <div class="w-1/3 border-r border-gray-800 overflow-y-auto p-4 space-y-2 custom-scrollbar bg-gray-900" id="modal-lista-chamadas"></div>
                 
-                <div class="card flex flex-col items-center justify-center">
-                    <h2 class="text-xl font-bold text-white mb-2 w-full">Evolução de Performance</h2>
-                    <p class="text-sm text-slate-400 mb-4 w-full">Histórico cronológico das notas gerais do SDR.</p>
-                    <div class="w-full h-64 flex items-center justify-center">
-                        <canvas id="evolucaoLineChart"></canvas>
+                <div class="w-2/3 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-[#0b0f19]" id="modal-conteudo-chamada">
+                    <div class="text-center py-12 text-gray-500">
+                        <i class="fa-solid fa-file-waveform text-5xl mb-4 block text-gray-700"></i>
+                        Selecione uma ligação comercial ao lado para abrir o raio-x da venda.
                     </div>
                 </div>
             </div>
-
-            <div>
-                <h2 class="text-2xl font-bold text-white mb-6 border-b border-slate-700 pb-2">Auditoria Detalhada & Scripts Táticos</h2>
-                <div id="lista-feedbacks" class="space-y-6"></div>
-            </div>
-            
         </div>
     </div>
 
     <script>
-        let dadosGlobais = {};
-        let radarChart = null;
-        let lineChart = null;
+        let database = {};
 
-        // Tenta buscar o banco de dados consolidado
-        fetch('consolidated_data.json')
-            .then(response => {
-                if (!response.ok) throw new Error("Arquivo não encontrado");
-                return response.json();
-            })
-            .then(data => {
-                dadosGlobais = data;
-                inicializarDashboard();
-            })
-            .catch(err => {
-                console.log("Aguardando geração do JSON pelas Actions...");
+        function switchTab(tab) {
+            ['geral', 'equipe', 'instrucoes'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`menu-${t}`).classList.remove('sidebar-active');
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`menu-${tab}`).classList.add('sidebar-active');
+            
+            document.getElementById('page-title').innerText = 
+                tab === 'geral' ? "Visão Geral" : tab === 'equipe' ? "Equipe SDR" : "Documentação";
+        }
+
+        async function init() {
+            try {
+                // Prevenção de Cache com timestamp na URL
+                const cacheBuster = new Date().getTime();
+                const response = await fetch(`consolidated_data.json?t=${cacheBuster}`);
+                
+                if (!response.ok) throw new Error("Banco de dados não encontrado.");
+                database = await response.json();
+                renderDashboard();
+            } catch (e) {
+                console.error("Erro ao carregar o sistema:", e);
+                document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500">Erro ao carregar banco de dados. Certifique-se de que o robô executou com sucesso.</td></tr>`;
+            }
+        }
+
+        function renderDashboard() {
+            const chamadas = Object.values(database);
+            if (chamadas.length === 0) {
+                document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500">Nenhuma ligação com áudio válido encontrada no período.</td></tr>`;
+                return;
+            }
+
+            // Cálculos Globais com Proteção (NaN fallback)
+            const total = chamadas.length;
+            const somaNotas = chamadas.reduce((acc, c) => acc + (parseFloat(c.nota_spin) || 0), 0);
+            const mediaGlobal = (somaNotas / total).toFixed(1);
+            const criticos = chamadas.filter(c => (parseFloat(c.nota_spin) || 0) < 6).length;
+
+            document.getElementById('total-ligacoes').innerText = total;
+            document.getElementById('media-geral').innerText = mediaGlobal;
+            document.getElementById('casos-criticos').innerText = criticos;
+
+            // Organizar dados por SDR
+            const sdrs = {};
+            chamadas.forEach(c => {
+                const sdrNome = c.sdr || "Desconhecido";
+                if (!sdrs[sdrNome]) sdrs[sdrNome] = [];
+                sdrs[sdrNome].push(c);
             });
 
-        function inicializarDashboard() {
-            document.getElementById('tela-espera').classList.add('hidden');
-            document.getElementById('dashboard-conteudo').classList.remove('hidden');
+            // Construir Cards da Equipe
+            const gridEquipe = document.getElementById('tab-equipe');
+            gridEquipe.innerHTML = '';
             
-            const statusBox = document.getElementById('status-box');
-            statusBox.innerHTML = '✅ Banco de Dados Ativo';
-            statusBox.className = "mt-4 md:mt-0 px-4 py-2 bg-emerald-950 text-emerald-400 rounded-full text-sm font-semibold border border-emerald-700 flex items-center gap-2 shadow-lg shadow-emerald-900/20";
-
-            const anos = Object.keys(dadosGlobais);
-            if (anos.length === 0) return;
-
-            const selectAno = document.getElementById('filtro-ano');
-            anos.forEach(ano => selectAno.add(new Option(ano, ano)));
-
-            selectAno.addEventListener('change', atualizarMeses);
-            atualizarMeses();
-        }
-
-        function atualizarMeses() {
-            const ano = document.getElementById('filtro-ano').value;
-            const selectMes = document.getElementById('filtro-mes');
-            selectMes.innerHTML = '';
-
-            const meses = Object.keys(dadosGlobais[ano] || {});
-            meses.forEach(mes => selectMes.add(new Option(mes, mes)));
-
-            selectMes.addEventListener('change', atualizarSDRs);
-            atualizarSDRs();
-        }
-
-        function atualizarSDRs() {
-            const ano = document.getElementById('filtro-ano').value;
-            const mes = document.getElementById('filtro-mes').value;
-            const selectSDR = document.getElementById('filtro-sdr');
-            selectSDR.innerHTML = '';
-
-            const sdrs = Object.keys(dadosGlobais[ano]?.[mes] || {});
-            sdrs.forEach(sdr => selectSDR.add(new Option(sdr, sdr)));
-
-            selectSDR.addEventListener('change', renderizarDadosSDR);
-            renderizarDadosSDR();
-        }
-
-        function renderizarDadosSDR() {
-            const ano = document.getElementById('filtro-ano').value;
-            const mes = document.getElementById('filtro-mes').value;
-            const sdr = document.getElementById('filtro-sdr').value;
-
-            const chamadas = dadosGlobais[ano]?.[mes]?.[sdr] || [];
-            if (chamadas.length === 0) return;
-
-            let somaS = 0, somap = 0, somaI = 0, somaN = 0;
-            let somaNotaGeral = 0, somaWPS = 0;
-            let notasGerais = [];
-            let labelsChamadas = [];
-            let containerFeedbacks = document.getElementById('lista-feedbacks');
-            containerFeedbacks.innerHTML = '';
-
-            chamadas.forEach((c, idx) => {
-                const sc = c.analise.spin_scoring;
-                const notaGeral = c.analise.nota_geral;
+            Object.keys(sdrs).sort().forEach(nome => {
+                const lista = sdrs[nome];
+                const mediaSDR = (lista.reduce((acc, c) => acc + (parseFloat(c.nota_spin) || 0), 0) / lista.length).toFixed(1);
                 
-                somaS += sc.situacao;
-                somap += sc.problema;
-                somaI += sc.implicacao;
-                somaN += sc.necessidade_solucao;
-                somaNotaGeral += notaGeral;
-                somaWPS += c.analise.wps_media;
-
-                notasGerais.push(notaGeral);
-                labelsChamadas.push(`Ligação ${idx + 1}`);
-
-                // Define cor dinâmica para o texto da nota com base no desempenho
-                let corTextoNota = 'text-white';
-                if (notaGeral >= 8) corTextoNota = 'text-emerald-400';
-                else if (notaGeral <= 5) corTextoNota = 'text-red-400';
-                else corTextoNota = 'text-amber-400';
-
-                let corBorda = `borda-${c.analise.cor_sinalizadora}`;
-                let htmlPontos = '';
-                
-                // Trata o caso raro de ligações perfeitas sem erros
-                if (!c.analise.pontos_melhoria || c.analise.pontos_melhoria.length === 0) {
-                    htmlPontos = `<div class="mt-4 p-3 bg-emerald-900/30 border border-emerald-800 rounded text-emerald-400 text-sm font-medium">✨ Excelência técnica: Nenhum ponto crítico de melhoria detectado nesta ligação.</div>`;
-                } else {
-                    c.analise.pontos_melhoria.forEach(p => {
-                        htmlPontos += `
-                            <div class="mt-4 border-t border-slate-700 pt-3">
-                                <span class="inline-block px-2 py-0.5 bg-slate-900 text-xs text-blue-400 rounded font-bold uppercase tracking-wider">${p.etapa}</span>
-                                <p class="text-sm mt-2 text-slate-300"><strong class="text-white">Erro Identificado:</strong> ${p.erro_identificado}</p>
-                                <p class="text-sm text-slate-400 mt-1"><strong class="text-slate-300">Impacto Técnico:</strong> ${p.impacto_tecnico}</p>
-                                <p class="text-sm text-slate-400 mt-1"><strong class="text-slate-300">Estratégia Correta:</strong> ${p.como_deveria_ter_feito}</p>
-                                <div class="script-box mt-3">
-                                    <span class="text-xs text-blue-400 font-bold block not-italic uppercase mb-1 flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
-                                        Script Prático Sugerido:
-                                    </span>
-                                    "${p.script_alternativo}"
-                                </div>
-                            </div>
-                        `;
-                    });
+                // Tratamento seguro para extrair iniciais de nomes
+                let iniciais = "SD";
+                if (nome && nome !== "Desconhecido") {
+                    const partes = nome.split(' ').filter(n => n.length > 0);
+                    if(partes.length >= 2) iniciais = (partes[0][0] + partes[1][0]).toUpperCase();
+                    else if(partes.length === 1) iniciais = partes[0].substring(0, 2).toUpperCase();
                 }
 
-                // CORREÇÃO: Puxando a data do JSON corretamente
-                const dataFormatada = c.data_atividade || 'Data não informada';
-
-                containerFeedbacks.innerHTML += `
-                    <div class="card ${corBorda}">
-                        <div class="flex justify-between items-start flex-wrap gap-4">
-                            <div>
-                                <h3 class="text-lg font-bold text-white">${c.titulo || 'Chamada Auditada'}</h3>
-                                <div class="flex flex-wrap gap-3 mt-1">
-                                    <span class="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded">ID: ${c.id_registro}</span>
-                                    <span class="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded">🗓️ ${dataFormatada}</span>
-                                    <span class="text-xs text-slate-400 bg-slate-800 px-2 py-1 rounded">⏱️ ${c.duracao || '--:--'}</span>
-                                </div>
-                                <p class="text-sm text-slate-300 mt-3">Ritmo de fala: <strong class="text-blue-300">${c.analise.wps_media} WPS (${c.analise.wps_classificacao})</strong></p>
-                            </div>
-                            <div class="text-right bg-slate-900 p-3 rounded-lg border border-slate-700 min-w-[100px]">
-                                <span class="text-3xl font-black ${corTextoNota}">${notaGeral}</span><span class="text-slate-500 text-sm font-bold">/10</span>
-                                <div class="text-[10px] font-bold uppercase text-slate-400 mt-1">Nota Geral</div>
-                            </div>
+                const card = document.createElement('div');
+                card.className = "card-dark p-6 rounded-xl shadow-lg cursor-pointer hover:border-indigo-500 hover:-translate-y-1 transform transition duration-200";
+                card.onclick = () => openSDRModal(nome);
+                card.innerHTML = `
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-xl flex items-center justify-center font-black text-white text-xl shadow-inner">${iniciais}</div>
+                        <div>
+                            <h4 class="font-bold text-white text-lg">${nome}</h4>
+                            <span class="text-xs text-indigo-400 font-semibold tracking-wide">Representante Vendas</span>
                         </div>
-                        ${htmlPontos}
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 border-t border-gray-800 pt-5">
+                        <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-800">
+                            <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider block mb-1">Auditorias</span>
+                            <p class="text-2xl font-black text-white">${lista.length}</p>
+                        </div>
+                        <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-800">
+                            <span class="text-[10px] uppercase text-gray-500 font-bold tracking-wider block mb-1">Média SPIN</span>
+                            <p class="text-2xl font-black ${mediaSDR < 6 ? 'text-rose-400' : 'text-emerald-400'}">${mediaSDR}</p>
+                        </div>
                     </div>
                 `;
+                gridEquipe.appendChild(card);
             });
 
-            const total = chamadas.length;
-            const mediasSPIN = [(somaS/total).toFixed(1), (somap/total).toFixed(1), (somaI/total).toFixed(1), (somaN/total).toFixed(1)];
+            // Construir Tabela Geral (Ordenada das mais recentes para mais antigas)
+            const tabela = document.getElementById('tabela-criticos');
+            tabela.innerHTML = '';
             
-            // Atualiza os KPIs na tela
-            document.getElementById('kpi-nota').innerText = (somaNotaGeral / total).toFixed(1);
-            document.getElementById('kpi-chamadas').innerText = total;
-            document.getElementById('kpi-wps').innerText = (somaWPS / total).toFixed(1);
+            // Ordem decrescente básica pelo ID do HubSpot (que é sequencial)
+            const chamadasOrdenadas = chamadas.sort((a,b) => parseInt(b.id || 0) - parseInt(a.id || 0));
 
-            // Renderiza o Gráfico de Radar
-            if (radarChart) radarChart.destroy();
-            const ctxRadar = document.getElementById('spinRadarChart').getContext('2d');
-            radarChart = new Chart(ctxRadar, {
-                type: 'radar',
-                data: {
-                    labels: ['S - Situação', 'P - Problema', 'I - Implicação', 'N - Necessidade'],
-                    datasets: [{
-                        label: 'Média de Domínio',
-                        data: mediasSPIN,
-                        backgroundColor: 'rgba(59, 130, 246, 0.25)',
-                        borderColor: '#3b82f6',
-                        pointBackgroundColor: '#60a5fa',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#3b82f6',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    scales: {
-                        r: {
-                            grid: { color: '#334155' },
-                            angleLines: { color: '#334155' },
-                            pointLabels: { color: '#cbd5e1', font: { size: 12, weight: 'bold' } },
-                            suggestedMin: 0,
-                            suggestedMax: 10,
-                            ticks: { display: false }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            // Renderiza o Gráfico de Linha
-            if (lineChart) lineChart.destroy();
-            const ctxLine = document.getElementById('evolucaoLineChart').getContext('2d');
-            lineChart = new Chart(ctxLine, {
-                type: 'line',
-                data: {
-                    labels: labelsChamadas,
-                    datasets: [{
-                        label: 'Nota Geral',
-                        data: notasGerais,
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#10b981',
-                        pointBorderColor: '#fff',
-                        pointRadius: 4,
-                        fill: true,
-                        tension: 0.4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { min: 0, max: 10, grid: { color: '#334155', borderDash: [5, 5] }, ticks: { color: '#94a3b8', stepSize: 2 } },
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
-                    },
-                    plugins: { 
-                        legend: { display: false },
-                        tooltip: { backgroundColor: '#1e293b', titleColor: '#fff', bodyColor: '#cbd5e1', borderColor: '#334155', borderWidth: 1 }
-                    }
-                }
+            chamadasOrdenadas.forEach(c => {
+                const nota = parseFloat(c.nota_spin) || 0;
+                const corBadge = nota < 6 ? 'bg-rose-950/80 text-rose-400 border border-rose-900' : 'bg-emerald-950/80 text-emerald-400 border border-emerald-900';
+                
+                const tr = document.createElement('tr');
+                tr.className = "border-b border-gray-800/60 hover:bg-gray-800/30 transition";
+                tr.innerHTML = `
+                    <td class="py-3.5 pl-2 font-semibold text-white flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full ${nota < 6 ? 'bg-rose-500' : 'bg-emerald-500'}"></div> ${c.sdr || "N/A"}</td>
+                    <td class="py-3.5 text-gray-400 font-medium">${c.data || "--"}</td>
+                    <td class="py-3.5 text-gray-400 font-medium"><i class="fa-regular fa-clock text-gray-600 mr-1"></i> ${c.duracao || "--"}</td>
+                    <td class="py-3.5"><span class="px-2.5 py-1 rounded-md text-xs font-bold shadow-sm ${corBadge}">${nota.toFixed(1)}</span></td>
+                    <td class="py-3.5 text-right pr-2"><button onclick="openSDRModal('${c.sdr}', '${c.id}')" class="text-indigo-400 hover:text-indigo-300 hover:underline font-semibold bg-indigo-950/30 px-3 py-1.5 rounded-lg border border-indigo-900/50 transition">Auditoria <i class="fa-solid fa-arrow-right text-[10px] ml-1"></i></button></td>
+                `;
+                tabela.appendChild(tr);
             });
         }
+
+        function openSDRModal(nome, callIdToSelect = null) {
+            const modal = document.getElementById('modal-sdr');
+            document.getElementById('modal-sdr-name').innerText = nome;
+            
+            const listaContainer = document.getElementById('modal-lista-chamadas');
+            listaContainer.innerHTML = '';
+
+            const listaFiltrada = Object.values(database).filter(c => c.sdr === nome).sort((a,b) => parseInt(b.id || 0) - parseInt(a.id || 0));
+
+            listaFiltrada.forEach(c => {
+                const nota = parseFloat(c.nota_spin) || 0;
+                const btn = document.createElement('button');
+                btn.id = `btn-call-${c.id}`;
+                btn.className = "call-list-btn w-full text-left p-3.5 rounded-xl bg-gray-800/30 hover:bg-gray-800 border border-gray-800 hover:border-gray-600 transition flex justify-between items-center group mb-2";
+                btn.onclick = () => {
+                    document.querySelectorAll('.call-list-btn').forEach(b => {
+                        b.classList.remove('bg-indigo-900/20', 'border-indigo-700/50');
+                        b.classList.add('bg-gray-800/30', 'border-gray-800');
+                    });
+                    btn.classList.add('bg-indigo-900/20', 'border-indigo-700/50');
+                    btn.classList.remove('bg-gray-800/30', 'border-gray-800');
+                    selectCall(c);
+                };
+                
+                btn.innerHTML = `
+                    <div>
+                        <p class="font-bold text-white group-hover:text-indigo-400 transition text-sm">ID: ${c.id}</p>
+                        <p class="text-[11px] text-gray-500 mt-0.5 font-medium">${c.data}</p>
+                    </div>
+                    <span class="font-black ${nota < 6 ? 'text-rose-400' : 'text-emerald-400'} text-base">${nota.toFixed(1)}</span>
+                `;
+                listaContainer.appendChild(btn);
+            });
+
+            modal.classList.remove('hidden');
+            
+            // Se foi passado um ID específico para abrir, abre ele, senão abre o primeiro
+            if (callIdToSelect) {
+                const chamadaEspecifica = listaFiltrada.find(c => c.id === callIdToSelect);
+                if (chamadaEspecifica) {
+                    setTimeout(() => document.getElementById(`btn-call-${callIdToSelect}`).click(), 10);
+                }
+            } else if (listaFiltrada.length > 0) {
+                setTimeout(() => document.getElementById(`btn-call-${listaFiltrada[0].id}`).click(), 10);
+            }
+        }
+
+        function selectCall(c) {
+            const loader = document.getElementById('modal-loader');
+            loader.classList.remove('hidden');
+
+            const nota = parseFloat(c.nota_spin) || 0;
+            const titulo = c.titulo || "Chamada de Vendas";
+            
+            // Timeout ultra-rápido só para dar a sensação visual de refresh
+            setTimeout(() => {
+                const conteudo = document.getElementById('modal-conteudo-chamada');
+                conteudo.innerHTML = `
+                    <div class="flex justify-between items-start border-b border-gray-800 pb-5">
+                        <div class="pr-4">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-gray-800 text-gray-300 text-[10px] font-bold px-2 py-0.5 rounded border border-gray-700">HubSpot ID: ${c.id}</span>
+                                <span class="text-xs text-gray-500 font-medium"><i class="fa-regular fa-calendar mr-1"></i> ${c.data || 'N/A'}</span>
+                            </div>
+                            <h3 class="text-2xl font-black text-white mt-2 leading-tight">${titulo}</h3>
+                            <p class="text-sm text-gray-400 mt-2 font-medium"><i class="fa-solid fa-stopwatch text-gray-500 mr-1.5"></i> Duração do Áudio Original: ${c.duracao}</p>
+                        </div>
+                        <a href="${c.audio_url}" target="_blank" class="shrink-0 bg-indigo-600 hover:bg-indigo-500 text-white text-sm px-5 py-2.5 rounded-xl font-bold transition flex items-center gap-2 shadow-lg shadow-indigo-900/20">
+                            <i class="fa-solid fa-circle-play text-lg"></i> Ouvir no HubSpot
+                        </a>
+                    </div>
+
+                    <div class="bg-gray-800/30 p-5 rounded-2xl border border-gray-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs text-gray-400 uppercase font-black tracking-widest block mb-1">Score Final SPIN</span>
+                            <p class="text-sm text-gray-500 font-medium">Classificação dada pela inteligência artificial Llama-3.</p>
+                        </div>
+                        <span class="text-5xl font-black ${nota < 6 ? 'text-rose-500' : 'text-emerald-500'} bg-gray-900 px-6 py-2 rounded-xl border border-gray-800 shadow-inner">${nota.toFixed(1)}</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-black text-white uppercase tracking-widest text-indigo-400 flex items-center"><i class="fa-solid fa-microchip mr-2 text-lg"></i> Parecer do Auditor</h4>
+                        <div class="bg-gray-800/40 border border-gray-700/50 p-5 rounded-2xl text-sm leading-relaxed text-gray-300 whitespace-pre-line shadow-inner">${c.avaliacao || 'Parecer não gerado.'}</div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h4 class="text-xs font-black text-white uppercase tracking-widest text-emerald-400 flex items-center"><i class="fa-solid fa-bullseye mr-2 text-lg"></i> Plano de Ação & Sugestões</h4>
+                        <div class="bg-emerald-950/20 border border-emerald-900/30 p-5 rounded-2xl text-sm leading-relaxed text-emerald-100/80 shadow-inner">${c.sugestoes || 'Sem sugestões específicas registradas.'}</div>
+                    </div>
+
+                    <div class="space-y-3 pt-4 border-t border-gray-800">
+                        <h4 class="text-xs font-black text-white uppercase tracking-widest text-gray-500 flex items-center"><i class="fa-solid fa-closed-captioning mr-2 text-lg"></i> Transcrição (Whisper AI)</h4>
+                        <div class="bg-gray-900 border border-gray-800 p-5 rounded-2xl text-[13px] text-gray-400 max-h-80 overflow-y-auto custom-scrollbar leading-relaxed whitespace-pre-line">${c.transcricao || 'Áudio sem transcrição válida.'}</div>
+                    </div>
+                `;
+                loader.classList.add('hidden');
+            }, 300);
+        }
+
+        function closeModal() {
+            document.getElementById('modal-sdr').classList.add('hidden');
+        }
+
+        // Fecha modal ao clicar fora
+        document.getElementById('modal-sdr').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Inicia aplicação
+        window.onload = init;
     </script>
 </body>
 </html>
