@@ -626,19 +626,22 @@
 
             const element = document.getElementById('printable-dossier').cloneNode(true);
             
-            // Ajustes cirúrgicos para o PDF não cortar as laterais
+            // Remove restrições de formatação web para liberar toda a extensão do documento
+            element.classList.remove('max-w-7xl');
+            element.style.width = '1200px'; 
+            element.style.maxWidth = 'none';
+            element.style.margin = '0';
             element.style.height = 'auto';
             element.style.overflow = 'visible';
-            element.style.width = '1200px'; 
             
-            // Fim da Guilhotina Cega: Evita quebra de página no meio das caixas
+            // Evita a Guilhotina Cega: Empurra blocos inteiros para a próxima página
             const avoidBreaks = element.querySelectorAll('.bg-gray-900\\/50, .pdf-no-break');
             avoidBreaks.forEach(el => {
                 el.style.pageBreakInside = 'avoid';
                 el.style.breakInside = 'avoid';
             });
 
-            // Libera as caixas de scroll para mostrarem todo o conteúdo
+            // Libera a rolagem para captar textos grandes na íntegra
             const bodyScroll = element.querySelector('#modal-body-scroll');
             if(bodyScroll) { bodyScroll.style.overflow = 'visible'; bodyScroll.style.height = 'auto'; }
             
@@ -655,27 +658,31 @@
                 transcricaoBox.style.overflow = 'visible';
             }
 
-            // Remove botões de navegação
+            // Oculta botões do layout no PDF final
             const linksContainer = element.querySelector('#modal-links');
             if(linksContainer) linksContainer.style.display = 'none';
             const closeBtn = element.querySelector('#btn-close-modal');
             if(closeBtn) closeBtn.style.display = 'none';
 
+            // Wrapper seguro, no topo absoluto, para o html2canvas não se perder nas coordenadas (Corte do lado Esquerdo resolvido aqui)
             const wrapper = document.createElement('div');
             wrapper.style.position = 'absolute';
-            wrapper.style.top = '-9999px';
-            wrapper.style.left = '-9999px';
+            wrapper.style.top = '0';
+            wrapper.style.left = '0';
+            wrapper.style.width = '1200px';
+            wrapper.style.zIndex = '-9999';
+            wrapper.style.visibility = 'hidden';
             wrapper.appendChild(element);
             document.body.appendChild(wrapper);
 
             const sdrName = document.getElementById('modal-title').innerText.replace('Auditoria: ', '');
 
-            // Força a janela do conversor a ter a mesma largura (1200px) do documento clone
+            // Configuração A4 Paisagem com zoom seguro
             const opt = {
                 margin:       [5, 5, 5, 5],
                 filename:     `Auditoria_SDR_${sdrName.replace(/\s+/g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, windowWidth: 1200 },
+                html2canvas:  { scale: 1.5, scrollX: 0, scrollY: 0, windowWidth: 1200 },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
             };
 
