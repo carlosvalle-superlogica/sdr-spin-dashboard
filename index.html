@@ -25,6 +25,9 @@
         .badge-sim { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
         .badge-nao { background: rgba(244,63,94,0.1); color: #fb7185; border: 1px solid rgba(244,63,94,0.3); }
         .badge-na { background: rgba(107,114,128,0.1); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
+        
+        /* Regras estritas de quebra de página para o PDF */
+        .pdf-no-break { page-break-inside: avoid !important; break-inside: avoid !important; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -294,13 +297,7 @@
         let picker;
 
         function initCalendario() {
-            picker = flatpickr("#date-range", { 
-                mode: "range", 
-                dateFormat: "Y-m-d", 
-                locale: "pt", 
-                theme: "dark",
-                onChange: applyFilters
-            });
+            picker = flatpickr("#date-range", { mode: "range", dateFormat: "Y-m-d", locale: "pt", theme: "dark", onChange: applyFilters });
         }
 
         function switchTab(tab) {
@@ -312,13 +309,7 @@
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             document.getElementById(`menu-${tab}`).classList.add('sidebar-active');
             
-            const titles = { 
-                geral: "Visão Geral", 
-                equipe: "Equipe SDR", 
-                dash: "Dashboard Analytics", 
-                auditorias: "Histórico & Dossiês", 
-                playbooks: "Playbooks SPIN" 
-            };
+            const titles = { geral: "Visão Geral", equipe: "Equipe SDR", dash: "Dashboard Analytics", auditorias: "Histórico & Dossiês", playbooks: "Playbooks SPIN" };
             document.getElementById('page-title').innerText = titles[tab];
         }
 
@@ -352,7 +343,6 @@
             
             let filtrados = Object.values(database).filter(c => {
                 if (sdrSel !== 'todos' && c.sdr !== sdrSel) return false;
-                
                 if (dates.length === 2 && c.data) {
                     try {
                         let dataStr = c.data.split(' ')[0];
@@ -459,19 +449,11 @@
                 I = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.i || 0)),0)/dados.length;
                 N = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.n || 0)),0)/dados.length;
             }
-            
             if(spiderChart) spiderChart.destroy();
             spiderChart = new Chart(document.getElementById('spiderChart'), {
                 type: 'radar',
-                data: { 
-                    labels: ['S (Situação)', 'P (Problema)', 'I (Implicação)', 'N (Necessidade)'], 
-                    datasets: [{ data: [S, P, I, N], backgroundColor: 'rgba(99,102,241,0.2)', borderColor: '#6366f1', pointBackgroundColor: '#818cf8', borderWidth: 2 }] 
-                },
-                options: { 
-                    maintainAspectRatio: false,
-                    scales: { r: { min: 0, max: 10, angleLines: {color: '#1f2937'}, grid: {color: '#1f2937'}, pointLabels: {color: '#9ca3af', font: {size: 12, weight: 'bold'}, padding: 15}, ticks: { display: false, stepSize: 2 } } }, 
-                    plugins: { legend: {display: false} } 
-                }
+                data: { labels: ['S (Situação)', 'P (Problema)', 'I (Implicação)', 'N (Necessidade)'], datasets: [{ data: [S, P, I, N], backgroundColor: 'rgba(99,102,241,0.2)', borderColor: '#6366f1', pointBackgroundColor: '#818cf8', borderWidth: 2 }] },
+                options: { maintainAspectRatio: false, scales: { r: { min: 0, max: 10, angleLines: {color: '#1f2937'}, grid: {color: '#1f2937'}, pointLabels: {color: '#9ca3af', font: {size: 12, weight: 'bold'}, padding: 15}, ticks: { display: false, stepSize: 2 } } }, plugins: { legend: {display: false} } }
             });
 
             document.getElementById('rx-s').innerText = S.toFixed(1);
@@ -487,10 +469,7 @@
             if(lineChart) lineChart.destroy();
             lineChart = new Chart(document.getElementById('lineChart'), {
                 type: 'line',
-                data: { labels, datasets: [
-                    { label: 'SPIN', data: n_spin, borderColor: '#6366f1', backgroundColor: '#6366f1', tension: 0.3, borderWidth: 2, pointRadius: 3 },
-                    { label: 'Conformidade', data: n_op, borderColor: '#a855f7', backgroundColor: '#a855f7', tension: 0.3, borderWidth: 2, pointRadius: 3 }
-                ]},
+                data: { labels, datasets: [{ label: 'SPIN', data: n_spin, borderColor: '#6366f1', backgroundColor: '#6366f1', tension: 0.3, borderWidth: 2, pointRadius: 3 }, { label: 'Conformidade', data: n_op, borderColor: '#a855f7', backgroundColor: '#a855f7', tension: 0.3, borderWidth: 2, pointRadius: 3 }]},
                 options: { maintainAspectRatio: false, scales: { y: { min: 0, max: 10, grid: {color: '#1f2937'} }, x: { grid: {color: '#1f2937'}, ticks: {display: false} } }, plugins: { legend: { position: 'bottom', labels: {color: '#9ca3af', boxWidth: 12} } } }
             });
         }
@@ -534,6 +513,13 @@
             return '<span class="badge-na px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider">N/A</span>';
         }
 
+        // FORMATADOR MARKDOWN: Converte ### do GPT em subtítulos em destaque
+        function formatMarkdown(text) {
+            if (!text) return '';
+            return text.replace(/###\s(.*?)(?=\n|$)/g, '<span class="block mt-5 mb-2 text-white font-bold uppercase tracking-wider border-b border-gray-700 pb-1">$1</span>')
+                       .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+        }
+
         function fecharModal() { document.getElementById('modal-sdr').classList.add('hidden'); }
 
         function abrirDossie(id) {
@@ -558,7 +544,7 @@
 
             let f = c.formulario || {};
             const itemHTML = (label, obj) => `
-                <div class="bg-gray-900/50 border border-gray-800 p-3 rounded-xl mb-2 hover:border-gray-700 transition">
+                <div class="bg-gray-900/50 border border-gray-800 p-3 rounded-xl mb-2 hover:border-gray-700 transition pdf-no-break">
                     <div class="flex justify-between items-start mb-1.5"><span class="text-xs font-bold text-gray-300 leading-tight">${label}</span>${getBadge(obj?.r)}</div>
                     ${obj?.e && obj?.e !== "..." ? `<p class="text-[10px] text-gray-500 italic border-l-2 border-gray-700 pl-2 mt-2 leading-relaxed">"${obj.e}"</p>` : ''}
                 </div>`;
@@ -595,7 +581,7 @@
                         <i class="fa-solid fa-gavel text-indigo-400 text-lg"></i> Relatório de Enablement Multiagente
                     </h4>
                     <div class="text-sm text-gray-300 whitespace-pre-line leading-relaxed font-medium">
-                        ${c.parecer || 'Ainda não foi gerado um parecer técnico para esta chamada.'}
+                        ${formatMarkdown(c.parecer) || 'Ainda não foi gerado um parecer técnico para esta chamada.'}
                     </div>
                 </div>
                 
@@ -604,7 +590,7 @@
                         <i class="fa-solid fa-bullseye text-rose-500 text-lg"></i> Próximos Passos de Treinamento
                     </h4>
                     <div class="text-sm text-rose-100/90 whitespace-pre-line leading-relaxed font-medium">
-                        ${c.sugestoes || 'Sem pontos de ação traçados.'}
+                        ${formatMarkdown(c.sugestoes) || 'Sem pontos de ação traçados.'}
                     </div>
                 </div>
                 
@@ -626,22 +612,21 @@
 
             const element = document.getElementById('printable-dossier').cloneNode(true);
             
-            // Remove restrições de formatação web para liberar toda a extensão do documento
-            element.classList.remove('max-w-7xl');
-            element.style.width = '1200px'; 
-            element.style.maxWidth = 'none';
-            element.style.margin = '0';
+            // Fim do Corte Esquerdo/Direito: Forçando tamanho de 1000px em modo Retrato
+            element.classList.remove('max-w-7xl', 'h-[95vh]');
+            element.style.width = '1000px'; 
             element.style.height = 'auto';
-            element.style.overflow = 'visible';
+            element.style.margin = '0';
+            element.style.padding = '20px';
             
-            // Evita a Guilhotina Cega: Empurra blocos inteiros para a próxima página
+            // Ativa o Anti-Guilhotina: não quebra páginas no meio das divs
             const avoidBreaks = element.querySelectorAll('.bg-gray-900\\/50, .pdf-no-break');
             avoidBreaks.forEach(el => {
                 el.style.pageBreakInside = 'avoid';
                 el.style.breakInside = 'avoid';
             });
 
-            // Libera a rolagem para captar textos grandes na íntegra
+            // Libera os scroll-bars para não esconder textos
             const bodyScroll = element.querySelector('#modal-body-scroll');
             if(bodyScroll) { bodyScroll.style.overflow = 'visible'; bodyScroll.style.height = 'auto'; }
             
@@ -658,32 +643,33 @@
                 transcricaoBox.style.overflow = 'visible';
             }
 
-            // Oculta botões do layout no PDF final
+            // Oculta botões que não devem ir para o PDF
             const linksContainer = element.querySelector('#modal-links');
             if(linksContainer) linksContainer.style.display = 'none';
             const closeBtn = element.querySelector('#btn-close-modal');
             if(closeBtn) closeBtn.style.display = 'none';
 
-            // Wrapper seguro, no topo absoluto, para o html2canvas não se perder nas coordenadas (Corte do lado Esquerdo resolvido aqui)
+            // Cria Wrapper no top-left cravado no eixo X e Y em zero para não perder o lado esquerdo
             const wrapper = document.createElement('div');
             wrapper.style.position = 'absolute';
-            wrapper.style.top = '0';
-            wrapper.style.left = '0';
-            wrapper.style.width = '1200px';
+            wrapper.style.top = '0px';
+            wrapper.style.left = '0px';
+            wrapper.style.width = '1000px';
             wrapper.style.zIndex = '-9999';
-            wrapper.style.visibility = 'hidden';
+            wrapper.style.opacity = '0'; // Continua invisível, mas no lugar certo!
+            wrapper.style.backgroundColor = '#0b0f19'; 
             wrapper.appendChild(element);
             document.body.appendChild(wrapper);
 
             const sdrName = document.getElementById('modal-title').innerText.replace('Auditoria: ', '');
 
-            // Configuração A4 Paisagem com zoom seguro
+            // PDF em Formato RETRATO (Portrait) com Zoom e escala ajustada
             const opt = {
-                margin:       [5, 5, 5, 5],
+                margin:       [10, 10, 10, 10],
                 filename:     `Auditoria_SDR_${sdrName.replace(/\s+/g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 1.5, scrollX: 0, scrollY: 0, windowWidth: 1200 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                html2canvas:  { scale: 2, scrollX: 0, scrollY: 0, windowWidth: 1000 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } // Alterado para Retrato
             };
 
             html2pdf().set(opt).from(element).save().then(() => {
