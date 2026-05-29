@@ -272,7 +272,7 @@
     </div>
 
     <div id="modal-sdr" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
-        <div id="printable-dossier" class="bg-gray-900 w-full max-w-7xl rounded-2xl h-[95vh] flex flex-col shadow-2xl relative border border-gray-800">
+        <div id="printable-dossier" class="bg-gray-900 w-[1280px] max-w-full rounded-2xl h-[95vh] flex flex-col shadow-2xl relative border border-gray-800">
             <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#111827] rounded-t-2xl flex-shrink-0 shadow-sm z-10">
                 <div>
                     <h2 id="modal-title" class="text-2xl font-extrabold text-white tracking-tight">Auditoria</h2>
@@ -513,10 +513,10 @@
             return '<span class="badge-na px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider">N/A</span>';
         }
 
-        // Formata o retorno do ChatGPT (Markdown) em HTML limpo e estilizado
+        // FORMATADOR: Limpa a poluição dos ### do ChatGPT e os transforma em títulos esteticamente elegantes no HTML e PDF.
         function formatMarkdown(text) {
             if (!text) return '';
-            return text.replace(/###\s(.*?)(?=\n|$)/g, '<span class="block mt-5 mb-2 text-white font-bold uppercase tracking-wider border-b border-gray-700 pb-1">$1</span>')
+            return text.replace(/###\s([^\n]+)/g, '<br><span class="block mt-2 mb-2 text-indigo-400 font-black uppercase tracking-widest border-b border-gray-800 pb-1">$1</span>')
                        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
         }
 
@@ -604,93 +604,78 @@
             document.getElementById('modal-sdr').classList.remove('hidden');
         }
 
-        // Função Genial para exportar o PDF (Reestruturada para Retrato / Empilhado Verticalmente)
+        // MOTOR DO PDF BLINDADO: Renderização fixa em 1280px a partir da coordenada 0,0
         function exportarDossiePDF() {
             const btn = document.getElementById('btn-gerar-pdf');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando...';
 
-            const element = document.getElementById('printable-dossier').cloneNode(true);
-            
-            // Força a largura para 800px (medida exata do A4) e quebra a estrutura Lado a Lado
-            element.classList.remove('max-w-7xl', 'h-[95vh]');
-            element.style.width = '800px'; 
+            // 1. Clona a estrutura
+            const original = document.getElementById('printable-dossier');
+            const element = original.cloneNode(true);
+
+            // 2. Remove amarras CSS do navegador para garantir que o Canvas "pinte" tudo
+            element.classList.remove('h-[95vh]', 'max-w-full');
             element.style.height = 'auto';
-            element.style.margin = '0';
-            element.style.padding = '20px';
+            element.style.width = '1280px'; // Força HD Largo idêntico ao Desktop
+            element.style.position = 'relative';
+            element.style.backgroundColor = '#0b0f19'; // Mantém o fundo escuro consistente
             
-            // Anti-Guilhotina
+            // 3. Destrava as barras de rolagem para o conteúdo descer até ao fim
+            const scrolls = element.querySelectorAll('.overflow-y-auto, .overflow-hidden, .custom-scrollbar, .h-56');
+            scrolls.forEach(el => {
+                el.classList.remove('overflow-y-auto', 'overflow-hidden', 'custom-scrollbar', 'h-56');
+                el.style.overflow = 'visible';
+                el.style.height = 'auto';
+            });
+
+            // 4. Ativa o Anti-Guilhotina: não quebra caixas de notas ao meio
             const avoidBreaks = element.querySelectorAll('.bg-gray-900\\/50, .pdf-no-break');
             avoidBreaks.forEach(el => {
                 el.style.pageBreakInside = 'avoid';
                 el.style.breakInside = 'avoid';
             });
 
-            // Reorganiza o layout de Lado a Lado (Row) para Empilhado (Column) para o PDF Retrato!
-            const bodyScroll = element.querySelector('#modal-body-scroll');
-            if(bodyScroll) { 
-                bodyScroll.classList.remove('flex'); 
-                bodyScroll.style.display = 'block'; 
-                bodyScroll.style.overflow = 'visible'; 
-                bodyScroll.style.height = 'auto'; 
-            }
-            
-            const matriz = element.querySelector('#modal-matriz');
-            if(matriz) { 
-                matriz.classList.remove('w-1/3', 'border-r', 'overflow-y-auto'); 
-                matriz.style.width = '100%';
-                matriz.style.borderRight = 'none';
-                matriz.style.borderBottom = '1px solid #1f2937';
-                matriz.style.marginBottom = '20px';
-                matriz.style.overflow = 'visible'; 
-                matriz.style.height = 'auto'; 
-            }
-            
-            const tecnico = element.querySelector('#modal-tecnico');
-            if(tecnico) { 
-                tecnico.classList.remove('w-2/3', 'overflow-y-auto'); 
-                tecnico.style.width = '100%';
-                tecnico.style.overflow = 'visible'; 
-                tecnico.style.height = 'auto'; 
-            }
-
-            const transcricaoBox = element.querySelector('#box-transcricao');
-            if(transcricaoBox) {
-                transcricaoBox.classList.remove('h-56', 'overflow-y-auto');
-                transcricaoBox.style.height = 'auto';
-                transcricaoBox.style.overflow = 'visible';
-            }
-
-            // Oculta botões do layout no PDF final
+            // 5. Oculta botões de tela
             const linksContainer = element.querySelector('#modal-links');
             if(linksContainer) linksContainer.style.display = 'none';
             const closeBtn = element.querySelector('#btn-close-modal');
             if(closeBtn) closeBtn.style.display = 'none';
 
-            // Wrapper seguro, posicionado no topo-esquerda extremo e transparente (Corrige o corte lateral)
+            // 6. SOLUÇÃO DO CORTE ESQUERDO: Posição invisível absoluta presa no (0,0) do eixo X e Y
             const wrapper = document.createElement('div');
             wrapper.style.position = 'absolute';
             wrapper.style.top = '0px';
             wrapper.style.left = '0px';
-            wrapper.style.width = '800px';
+            wrapper.style.width = '1280px';
             wrapper.style.zIndex = '-9999';
-            wrapper.style.opacity = '0'; 
-            wrapper.style.backgroundColor = '#0b0f19'; 
             wrapper.appendChild(element);
             document.body.appendChild(wrapper);
 
             const sdrName = document.getElementById('modal-title').innerText.replace('Auditoria: ', '');
 
-            // PDF em Formato RETRATO (Portrait) com largura fixa correspondente ao A4
+            // 7. Renderização em formato PAISAGEM (Landscape) com escala exata do clone
             const opt = {
-                margin:       [5, 5, 5, 5],
+                margin:       [10, 10, 10, 10],
                 filename:     `Auditoria_SDR_${sdrName.replace(/\s+/g, '_')}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, scrollX: 0, scrollY: 0, windowWidth: 800 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+                image:        { type: 'jpeg', quality: 1.0 },
+                html2canvas:  { 
+                    scale: 2, 
+                    useCORS: true, 
+                    windowWidth: 1280, 
+                    width: 1280, 
+                    scrollY: 0, 
+                    scrollX: 0 
+                },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
             };
 
+            // 8. Baixa e limpa o clone "fantasma" do fundo da tela
             html2pdf().set(opt).from(element).save().then(() => {
+                document.body.removeChild(wrapper);
+                btn.innerHTML = originalText;
+            }).catch(err => {
+                console.error("Erro no PDF:", err);
                 document.body.removeChild(wrapper);
                 btn.innerHTML = originalText;
             });
