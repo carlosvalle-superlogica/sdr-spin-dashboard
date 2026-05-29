@@ -43,25 +43,12 @@ def clean_json_response(text):
         text = text[:-3]
     return text.strip()
 
-def extract_score(analysis_dict, raw_text):
-    """Varre chaves e strings por expressão regular para capturar a nota correta da IA"""
-    for key in ["nota_spin", "nota", "score", "pontuacao", "notafinal", "score_final"]:
-        if key in analysis_dict:
-            try:
-                val = float(analysis_dict[key])
-                if 0 <= val <= 10:
-                    return val
-            except:
-                pass
+def safe_float(value, default=0.0):
     try:
-        matches = re.findall(r'"(?:nota_spin|nota|score|pontuacao)":\s*([0-9.]+)', raw_text)
-        for m in matches:
-            val = float(m)
-            if 0 <= val <= 10:
-                return val
+        val = float(value)
+        return val if 0 <= val <= 10 else default
     except:
-        pass
-    return 7.0
+        return default
 
 # ==========================================
 # 3. NÚCLEO DE PROCESSAMENTO DE LIGAÇÕES
@@ -82,12 +69,10 @@ def process_all_calls():
         except json.JSONDecodeError:
             db = {}
 
-    # Detecta o delimitador da planilha de forma isolada e limpa
     with open(CSV_FILE, mode='r', encoding='utf-8-sig') as f:
         sample = f.read(2048)
         delimiter = ';' if ';' in sample else ','
     
-    # Processamento oficial do CSV
     with open(CSV_FILE, mode='r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f, delimiter=delimiter)
         linhas_processadas = 0
@@ -122,7 +107,7 @@ def process_all_calls():
                 with urllib.request.urlopen(req, timeout=45) as response:
                     content_length = response.getheader('Content-Length')
                     if content_length and int(content_length) > 24 * 1024 * 1024:
-                        print(f"⚠️ Ignorado: Chamada {call_id} descartada por tamanho excessivo ({int(content_length) / 1024 / 1024:.1f}MB).")
+                        print(f"⚠️ Ignorado: Chamada {call_id} descartada por tamanho excessivo.")
                         continue
                     
                     buffer = io.BytesIO()
@@ -138,7 +123,6 @@ def process_all_calls():
                         buffer.write(chunk)
                     
                     if bytes_read > max_bytes:
-                        print(f"⚠️ Ignorado: Chamada {call_id} descartada durante download por ultrapassar 24MB.")
                         continue
                     
                     audio_bytes = buffer.getvalue()
@@ -152,23 +136,35 @@ def process_all_calls():
                 texto_ligacao = transcription.text
 
                 if len(texto_ligacao.strip()) < 10:
-                    print(f"Aviso: Áudio do ID {call_id} sem conteúdo de fala identificável. Ignorando.")
                     continue
 
+                # Instruções rígidas para as Notas SPIN e Sugestões obrigatórias menores que 10
                 prompt_sistema = (
                     f"{prompt_content}\n\n"
-                    "REGRA CRÍTICA DO SISTEMA: Responda APENAS com um objeto JSON válido. "
-                    "Use exatamente esta estrutura de chaves minúsculas: "
-                    "{\"nota_spin\": 8.5, \"avaliacao\": \"texto\", \"sugestoes\": \"texto\"}"
+                    "REGRA CRÍTICA DE EXECUÇÃO:\n"
+                    "1. Responda estritamente com um objeto JSON válido.\n"
+                    "2. Se a 'nota_spin' global for MENOR QUE 10.0, você DEVE obrigatoriamente preencher o campo 'sugestoes' detalhando onde foi o erro/falha do SDR na ligação e qual a sugestão prática de melhoria.\n"
+                    "3. Forneça notas de 0.0 a 10.0 para cada pilar do método SPIN nos campos descritos.\n\n"
+                    "ESTRUTURA OBRIGATÓRIA DO JSON:\n"
+                    "{\n"
+                    "  \"nota_spin\": 7.5,\n"
+                    "  \"nota_s\": 8.0,\n"
+                    "  \"nota_p\": 7.0,\n"
+                    "  \"nota_i\": 6.5,\n"
+                    "  \"nota_n\": 8.5,\n"
+                    "  \"avaliacao\": \"Sua análise geral aqui...\",\n"
+                    "  \"sugestoes\": \"[OBRIGATÓRIO PARA NOTAS < 10] O SDR errou em X... Sugerimos corrigir para Y...\"\n"
+                    "}"
                 )
 
+                # ALTERADO PARA O MODELO INSTANT COM LIMITE DE 500K TOKENS DIÁRIOS
                 chat_completion = client.chat.completions.create(
-                    model="llama-3.3-70b-versatile",
+                    model="llama-3.1-8b-instant",
                     messages=[
                         {"role": "system", "content": prompt_sistema},
                         {"role": "user", "content": f"Transcrição:\n\n{texto_ligacao}"}
                     ],
-                    temperature=0.2,
+                    temperature=0.1,
                     response_format={"type": "json_object"}
                 )
 
@@ -176,7 +172,7 @@ def process_all_calls():
                 clean_text = clean_json_response(raw_content)
                 analysis_data = json.loads(clean_text)
                 
-                nota = extract_score(analysis_data, clean_text)
+                nota_global = safe_float(analysis_data.get("nota_spin"), default=7.0)
 
                 db[call_id] = {
                     "id": call_id,
@@ -185,40 +181,36 @@ def process_all_calls():
                     "titulo": title,
                     "duracao": duration,
                     "audio_url": audio_url,
-                    "nota_spin": nota,
-                    "avaliacao": analysis_data.get("avaliacao", "Análise processada."),
-                    "sugestoes": analysis_data.get("sugestoes", "Sem sugestões adicionais."),
+                    "nota_spin": nota_global,
+                    "nota_s": safe_float(analysis_data.get("nota_s"), default=nota_global),
+                    "nota_p": safe_float(analysis_data.get("nota_p"), default=nota_global),
+                    "nota_i": safe_float(analysis_data.get("nota_i"), default=nota_global),
+                    "nota_n": safe_float(analysis_data.get("nota_n"), default=nota_global),
+                    "avaliacao": analysis_data.get("avaliacao", "Análise de conformidade executada."),
+                    "sugestoes": analysis_data.get("sugestoes", "Nenhuma falha crítica detectada."),
                     "transcricao": texto_ligacao
                 }
                 
                 linhas_processadas += 1
                 
-                # Salvamento Atômico Seguro
                 tmp_file = CONSOLIDATED_FILE + ".tmp"
                 with open(tmp_file, 'w', encoding='utf-8') as sf:
                     json.dump(db, sf, ensure_ascii=False, indent=4)
                 os.replace(tmp_file, CONSOLIDATED_FILE)
 
-                print(f"✅ Sucesso: Chamada {call_id} salva no JSON (Nota: {nota})")
-                time.sleep(3)
+                print(f"✅ Sucesso: Chamada {call_id} salva no JSON (Nota: {nota_global})")
+                time.sleep(2)
 
             except Exception as e:
-                # INTEGRAÇÃO DE PREVENÇÃO CONTRA RATE LIMIT EXCEEDED (ERRO 429)
                 if "429" in str(e) or "rate_limit_exceeded" in str(e):
-                    print("\n🛑 ALERTA DO SISTEMA: Limite de tokens diários atingido na API do Groq!")
-                    print("Salvando o progresso atual com segurança e encerrando a execução.")
+                    print("\n🛑 Limite de requisições temporárias atingido no Groq. Salvando progresso.")
                     break
                 else:
                     print(f"Erro no processamento do ID {call_id}: {e}")
-                    time.sleep(3)
+                    time.sleep(2)
                     continue
 
-    print(f"\n✅ EXECUÇÃO CONCLUÍDA: {linhas_processadas} novas chamadas integradas com sucesso à base de dados.")
+    print(f"\n✅ EXECUÇÃO CONCLUÍDA: {linhas_processadas} novas chamadas processadas.")
 
 if __name__ == "__main__":
-    try:
-        process_all_calls()
-    except Exception as erro_critico:
-        print("\n❌ ERRO CRÍTICO NO FLUXO PRINCIPAL:")
-        traceback.print_exc()
-        exit(1)
+    process_all_calls()
