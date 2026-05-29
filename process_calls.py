@@ -48,7 +48,7 @@ def safe_float(val, default=0.0):
         return default
 
 def calcular_segundos(duracao_str):
-    """Converte strings de duração formatadas (HH:mm:ss ou mm:ss) em segundos totais."""
+    """Converte strings de duração formatadas (HH:mm:ss ou mm:ss) in segundos totais."""
     try:
         partes = duracao_str.split(':')
         if len(partes) == 3: 
@@ -84,6 +84,33 @@ def calcular_nota_operacional(op_data, erro_fatal):
     nota_final = (nota_b1 + nota_b2 + nota_b3) / 30.0
     return min(max(nota_final, 0.0), 10.0)
 
+def executar_chat_com_retentativa(model, messages, response_format, max_retries=5):
+    """Executa chamadas à API do Groq controlando de forma inteligente erros de Rate Limit (429)."""
+    base_delay = 5  
+    for attempt in range(max_retries):
+        try:
+            chat = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                response_format=response_format,
+                temperature=0.1
+            )
+            return chat
+        except Exception as e:
+            err_msg = str(e)
+            if "429" in err_msg or "rate_limit" in err_msg.lower():
+                match = re.search(r"try again in ([0-9.]+)(s|ms)", err_msg)
+                wait_time = float(match.group(1)) if match else (base_delay ** (attempt + 1))
+                if match and match.group(2) == "ms":
+                    wait_time = wait_time / 1000.0
+                
+                wait_time = max(wait_time + 1.0, 3.0) 
+                print(f"   ⚠️ [RATE LIMIT] Limite atingido. Aguardando {wait_time}s antes da tentativa {attempt + 1}/{max_retries}...")
+                time.sleep(wait_time)
+            else:
+                raise e
+    raise RuntimeError("Erro: Falha persistente por excesso de requisições no Groq (Rate Limit).")
+
 # ==========================================
 # 3. PIPELINE DE EXECUÇÃO MULTIAGENTE
 # ==========================================
@@ -115,7 +142,7 @@ def process_all_calls():
             duration = row.get("Duração da chamada (HH:mm:ss)", "").strip() or "00:00"
             title = row.get("Título da chamada", "").strip()
             
-            # Recupera IDs associados e constrói dinamicamente a URL do HubSpot
+            # Recupera IDs associados e constrói dinamicamente a URL do HubSpot (Bug da URL fixado)
             deal_id = row.get("Associated Deal IDs", "").strip()
             deal_url = ""
             if deal_id:
@@ -169,8 +196,8 @@ def process_all_calls():
                 {{
                   "erro_fatal": false,
                   "operacional": {{
-                    "escuta": {{"r": "Sim", "e": "Evidência textual curta"}},
-                    "validacao": {{"r": "Não", "e": "Evidência textual curta"}},
+                    "escuta": {{"r": "Sim", "e": "Evidência"}},
+                    "validacao": {{"r": "Não", "e": "Evidência"}},
                     "compreensao": {{"r": "Sim", "e": "Evidência"}},
                     "objecoes": {{"r": "Sim", "e": "Evidência"}},
                     "linguagem": {{"r": "Sim", "e": "Evidência"}},
@@ -189,14 +216,13 @@ def process_all_calls():
                   }}
                 }}
                 """
-                chat1 = client.chat.completions.create(
-                    model="llama-3.1-8b-instant", 
+                chat1 = executar_chat_com_retentativa(
+                    model="llama-3.1-8b-instant",
                     messages=[{"role": "system", "content": prompt_agente1}, {"role": "user", "content": texto}],
-                    response_format={"type": "json_object"}, 
-                    temperature=0.0
+                    response_format={"type": "json_object"}
                 )
                 res1 = json.loads(clean_json(chat1.choices[0].message.content))
-                time.sleep(1)
+                time.sleep(4)
 
                 # --------------------------------------------------
                 # AGENTE 2: O Cientista de Método e SPIN Selling (Aderência)
@@ -214,17 +240,16 @@ def process_all_calls():
                   "analise_autoridade": "Descreva o controle de conversa e a postura consultiva do SDR."
                 }}
                 """
-                chat2 = client.chat.completions.create(
-                    model="llama-3.1-8b-instant", 
+                chat2 = executar_chat_com_retentativa(
+                    model="llama-3.1-8b-instant",
                     messages=[{"role": "system", "content": prompt_agente2}, {"role": "user", "content": texto}],
-                    response_format={"type": "json_object"}, 
-                    temperature=0.0
+                    response_format={"type": "json_object"}
                 )
                 res2 = json.loads(clean_json(chat2.choices[0].message.content))
-                time.sleep(1)
+                time.sleep(4)
 
                 # --------------------------------------------------
-                # AGENTE 3: O Diretor de Enablement (Sintetizador e Coach)
+                # AGENTE 3: O Diretor de Enablement (70B Versatile - Sem limites de corte)
                 # --------------------------------------------------
                 print(" -> Executando Agente 3: Diagnóstico de Impacto e Feedbacks Imediatos...")
                 contexto_sintese = f"""
@@ -255,14 +280,13 @@ def process_all_calls():
                   "plano_de_acao_curto": "Direcionamento prático e direto para o próximo contato do SDR."
                 }}
                 """
-                chat3 = client.chat.completions.create(
-                    model="llama-3.1-8b-instant", 
+                chat3 = executar_chat_com_retentativa(
+                    model="llama-3.1-70b-versatile",
                     messages=[
                         {"role": "system", "content": prompt_agente3},
                         {"role": "user", "content": f"Contexto dos Agentes:\n{contexto_sintese}\n\nTranscrição:\n{texto}"}
                     ],
-                    response_format={"type": "json_object"}, 
-                    temperature=0.1
+                    response_format={"type": "json_object"}
                 )
                 res3 = json.loads(clean_json(chat3.choices[0].message.content))
 
@@ -288,12 +312,12 @@ def process_all_calls():
                     json.dump(db, sf, ensure_ascii=False, indent=4)
                 
                 print(f"✅ Auditoria Finalizada! SPIN: {nota_spin:.1f} | Conformidade: {nota_op:.1f} | Alerta: {urgencia}")
-                time.sleep(2)
+                time.sleep(5) 
 
             except Exception as e:
                 print(f"❌ Erro Crítico no ID {call_id}: {e}")
                 traceback.print_exc()
-                time.sleep(3)
+                time.sleep(4)
 
 if __name__ == "__main__":
     process_all_calls()
