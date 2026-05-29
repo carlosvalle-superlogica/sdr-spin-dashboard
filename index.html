@@ -3,194 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SDR Auditor - Inteligência de Vendas</title>
+    <title>Dashboard | Auditoria Comercial</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/pt.js"></script>
+
     <style>
         body { background-color: #0b0f19; color: #f3f4f6; font-family: 'Inter', sans-serif; }
-        .sidebar-active { background: linear-gradient(90deg, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0) 100%); border-left: 4px solid #6366f1; color: #ffffff; }
+        .sidebar-active { background: linear-gradient(90deg, rgba(99,102,241,0.15), transparent); border-left: 4px solid #6366f1; color: #fff; }
         .card-dark { background-color: #111827; border: 1px solid #1f2937; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #111827; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #4b5563; }
+        .badge-sim { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-nao { background: rgba(244,63,94,0.1); color: #fb7185; border: 1px solid rgba(244,63,94,0.3); }
+        .badge-na { background: rgba(107,114,128,0.1); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
 
-    <div class="w-64 card-dark h-full flex flex-col justify-between p-4 border-r border-gray-800 flex-shrink-0">
-        <div>
-            <div class="flex items-center gap-3 px-2 py-4 border-b border-gray-800 mb-6">
-                <div class="bg-gradient-to-tr from-indigo-600 to-violet-500 p-2 rounded-xl text-white font-black text-xl flex items-center justify-center w-10 h-10 shadow-lg shadow-indigo-500/20">S</div>
-                <div>
-                    <span class="text-lg font-bold tracking-wide text-white block leading-none">SDR Auditor</span>
-                    <span class="text-[10px] text-gray-500 font-semibold uppercase tracking-wider mt-1 block">Métricas Hubspot</span>
-                </div>
+    <!-- Menu Lateral -->
+    <div class="w-64 card-dark h-full flex flex-col p-4 border-r border-gray-800 flex-shrink-0">
+        <div class="flex items-center gap-3 py-4 border-b border-gray-800 mb-6">
+            <div class="bg-indigo-600 p-2 rounded-xl text-white font-black text-xl w-10 h-10 flex items-center justify-center">S</div>
+            <div>
+                <span class="text-lg font-bold text-white block leading-none">Superlógica</span>
+                <span class="text-[10px] text-gray-500 font-semibold uppercase tracking-widest mt-1 block">Sales Audit</span>
             </div>
-            <nav class="space-y-1">
-                <button onclick="switchTab('geral')" id="menu-geral" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium text-sm sidebar-active">
-                    <i class="fa-solid fa-chart-pie w-5 text-base"></i> Visão Geral
-                </button>
-                <button onclick="switchTab('dash')" id="menu-dash" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium text-sm">
-                    <i class="fa-solid fa-chart-radar w-5 text-base"></i> Análise de Teia
-                </button>
-                <button onclick="switchTab('equipe')" id="menu-equipe" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium text-sm">
-                    <i class="fa-solid fa-users w-5 text-base"></i> Equipe SDR
-                </button>
-                <button onclick="switchTab('auditorias')" id="menu-auditorias" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium text-sm">
-                    <i class="fa-solid fa-phone-volume w-5 text-base"></i> Histórico Completo
-                </button>
-                <button onclick="switchTab('playbooks')" id="menu-playbooks" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium text-sm">
-                    <i class="fa-solid fa-book-open w-5 text-base"></i> Playbooks SPIN
-                </button>
-            </nav>
         </div>
-        <div class="text-[10px] text-gray-600 border-t border-gray-800 pt-4 text-center font-bold uppercase tracking-wider">
-            SDR Audit System v2.1
-        </div>
+        <nav class="space-y-1">
+            <button onclick="switchTab('geral')" id="menu-geral" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition sidebar-active font-medium">
+                <i class="fa-solid fa-chart-pie w-5"></i> Visão Geral
+            </button>
+            <button onclick="switchTab('dash')" id="menu-dash" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium">
+                <i class="fa-solid fa-chart-line w-5"></i> Dashboard Analytics
+            </button>
+            <button onclick="switchTab('auditorias')" id="menu-auditorias" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium">
+                <i class="fa-solid fa-list-check w-5"></i> Histórico & Dossiês
+            </button>
+            <!-- Restaurada a aba de Playbooks -->
+            <button onclick="switchTab('playbooks')" id="menu-playbooks" class="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white transition font-medium">
+                <i class="fa-solid fa-book-open w-5"></i> Playbooks SPIN
+            </button>
+        </nav>
     </div>
 
+    <!-- Conteúdo Principal -->
     <div class="flex-1 flex flex-col overflow-y-auto p-8 custom-scrollbar">
         
-        <div class="flex justify-between items-center mb-6 flex-shrink-0">
+        <!-- Header e Filtros -->
+        <div class="flex justify-between items-start mb-8 flex-shrink-0">
             <div>
                 <h1 id="page-title" class="text-3xl font-extrabold text-white tracking-tight">Visão Geral</h1>
-                <p id="page-subtitle" class="text-sm text-gray-400 mt-1">Consolidação e auditoria automatizada do processo comercial.</p>
+                <p class="text-sm text-gray-400 mt-1">Conformidade Operacional vs Técnica SPIN.</p>
             </div>
-            <div class="bg-indigo-950 text-indigo-400 border border-indigo-900/60 px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2 shadow-inner">
-                <span class="w-2 h-2 bg-indigo-400 rounded-full animate-pulse"></span> Banco de Dados Sincronizado
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 card-dark p-4 rounded-xl mb-8 flex-shrink-0 shadow-md">
-            <div>
-                <label class="text-[10px] uppercase tracking-wider text-gray-500 font-bold block mb-1.5">Filtrar por Ano</label>
-                <select id="filter-ano" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-800 text-gray-300 rounded-lg p-2.5 text-sm focus:border-indigo-500 focus:outline-none transition">
-                    <option value="todos">Todos os anos</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-[10px] uppercase tracking-wider text-gray-500 font-bold block mb-1.5">Filtrar por Mês</label>
-                <select id="filter-mes" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-800 text-gray-300 rounded-lg p-2.5 text-sm focus:border-indigo-500 focus:outline-none transition">
-                    <option value="todos">Todos os meses</option>
-                </select>
-            </div>
-            <div>
-                <label class="text-[10px] uppercase tracking-wider text-gray-500 font-bold block mb-1.5">SDR Analisado</label>
-                <select id="filter-sdr" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-800 text-gray-300 rounded-lg p-2.5 text-sm focus:border-indigo-500 focus:outline-none transition">
-                    <option value="todos">Todos os SDRs da Equipe</option>
-                </select>
+            <div class="flex gap-4">
+                <div class="w-64">
+                    <label class="text-[10px] uppercase text-gray-500 font-bold block mb-1">Período Analisado</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-calendar-day absolute left-3 top-3 text-indigo-400"></i>
+                        <input type="text" id="date-range" class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg pl-9 p-2 text-sm focus:border-indigo-500 focus:outline-none cursor-pointer" placeholder="Selecione o período">
+                    </div>
+                </div>
+                <div class="w-56">
+                    <label class="text-[10px] uppercase text-gray-500 font-bold block mb-1">Filtro de Equipe</label>
+                    <select id="filter-sdr" onchange="applyFilters()" class="w-full bg-gray-900 border border-gray-700 text-white rounded-lg p-2 text-sm focus:border-indigo-500 focus:outline-none cursor-pointer">
+                        <option value="todos">Toda a Equipe</option>
+                    </select>
+                </div>
             </div>
         </div>
 
+        <!-- ABA: GERAL -->
         <div id="tab-geral" class="space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                <div class="card-dark p-6 rounded-xl shadow-lg relative overflow-hidden group">
-                    <span class="text-xs uppercase text-gray-400 font-semibold tracking-wider block">Média Geral</span>
-                    <h2 id="media-geral" class="text-4xl font-black text-white mt-2">0.0</h2>
-                    <div class="absolute right-4 bottom-4 text-gray-800 text-3xl font-black group-hover:text-indigo-950 transition duration-300"><i class="fa-solid fa-star"></i></div>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div class="card-dark p-6 rounded-xl shadow-lg border-l-4 border-indigo-500">
+                    <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider block">Nota Média SPIN</span>
+                    <h2 id="media-spin" class="text-4xl font-black text-white mt-2">0.0</h2>
                 </div>
-                <div class="card-dark p-6 rounded-xl shadow-lg relative overflow-hidden group">
-                    <span class="text-xs uppercase text-gray-400 font-semibold tracking-wider block">Ligações Auditadas</span>
-                    <h2 id="total-ligacoes" class="text-4xl font-black text-indigo-400 mt-2">0</h2>
-                    <div class="absolute right-4 bottom-4 text-gray-800 text-3xl font-black group-hover:text-indigo-950 transition duration-300"><i class="fa-solid fa-phone"></i></div>
+                <div class="card-dark p-6 rounded-xl shadow-lg border-l-4 border-purple-500">
+                    <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider block">Conformidade (Sonia)</span>
+                    <h2 id="media-op" class="text-4xl font-black text-white mt-2">0.0</h2>
                 </div>
-                <div class="card-dark p-6 rounded-xl shadow-lg relative overflow-hidden group">
-                    <span class="text-xs uppercase text-gray-400 font-semibold tracking-wider block">Atenção Crítica (&lt; 6.0)</span>
+                <div class="card-dark p-6 rounded-xl shadow-lg border-l-4 border-emerald-500">
+                    <span class="text-[10px] uppercase text-gray-400 font-bold tracking-wider block">Ritmo de Fala (WPS)</span>
+                    <h2 id="media-wps" class="text-4xl font-black text-emerald-400 mt-2">0.0 <span class="text-sm font-medium text-gray-500">palavras/s</span></h2>
+                </div>
+                <div class="card-dark p-6 rounded-xl shadow-lg bg-rose-950/10 border border-rose-900/30">
+                    <span class="text-[10px] uppercase text-rose-400 font-bold tracking-wider block flex items-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Alertas de Urgência
+                    </span>
                     <h2 id="casos-criticos" class="text-4xl font-black text-rose-500 mt-2">0</h2>
-                    <div class="absolute right-4 bottom-4 text-gray-800 text-3xl font-black group-hover:text-rose-950 transition duration-300"><i class="fa-solid fa-triangle-exclamation"></i></div>
-                </div>
-                <div class="card-dark p-6 rounded-xl shadow-lg relative overflow-hidden group">
-                    <span class="text-xs uppercase text-gray-400 font-semibold tracking-wider block">Aproveitamento SPIN</span>
-                    <h2 id="taxa-aproveitamento" class="text-4xl font-black text-emerald-400 mt-2">0%</h2>
-                    <div class="absolute right-4 bottom-4 text-gray-800 text-3xl font-black group-hover:text-emerald-950 transition duration-300"><i class="fa-solid fa-bullseye"></i></div>
                 </div>
             </div>
-            
-            <div class="card-dark p-6 rounded-xl">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-fire text-rose-500"></i> Alertas de Desempenho (Ordem Crítica)</h3>
-                    <span class="text-xs text-gray-400 font-medium">Contatos que necessitam de feedback imediato</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="border-b border-gray-800 text-gray-400 text-xs font-bold uppercase tracking-wider">
-                                <th class="pb-3">SDR</th>
-                                <th class="pb-3">Data da Atividade</th>
-                                <th class="pb-3">Duração</th>
-                                <th class="pb-3">Nota Global</th>
-                                <th class="pb-3 text-right">Análise</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-criticos" class="text-sm divide-y divide-gray-800">
-                            <tr><td colspan="5" class="py-6 text-center text-gray-500">Nenhum registro encontrado.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6" id="grid-equipe"></div>
         </div>
 
+        <!-- ABA: DASHBOARD -->
         <div id="tab-dash" class="hidden space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 card-dark p-6 rounded-xl flex flex-col items-center justify-center min-h-[440px] shadow-lg">
-                    <h3 class="text-base font-bold text-white mb-6 self-start flex items-center gap-2"><i class="fa-solid fa-chart-radar text-indigo-400"></i> Mapeamento de Competências SPIN Selling</h3>
-                    <div class="w-full max-w-[340px] flex-1 flex items-center justify-center">
+                <div class="col-span-1 card-dark p-6 rounded-xl shadow-lg flex flex-col items-center min-h-[400px]">
+                    <h3 class="text-sm font-bold text-white mb-4 self-start">
+                        <i class="fa-solid fa-chart-radar text-indigo-400 mr-2"></i>Aderência Metodológica (SPIN)
+                    </h3>
+                    <div class="w-full flex-1 flex items-center justify-center max-w-[280px]">
                         <canvas id="spiderChart"></canvas>
                     </div>
                 </div>
-                <div class="card-dark p-6 rounded-xl space-y-4 flex flex-col justify-center shadow-lg">
-                    <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1.5"><i class="fa-solid fa-heart-pulse"></i> Raio-X Operacional</h4>
-                    <p class="text-xs text-gray-400 leading-relaxed">O gráfico de radar ao lado consolida as subnotas estruturais de cada pilar do método aplicadas nas ligações filtradas. Isso permite identificar em qual quadrante o time está falhando.</p>
-                    
-                    <div class="space-y-3 text-xs border-t border-gray-800 pt-4">
-                        <div class="p-2.5 rounded-lg bg-gray-900/50 border border-gray-800">
-                            <span class="font-bold text-white block">S - Situação (<span id="radar-val-s">0.0</span>)</span>
-                            <span class="text-gray-500 text-[11px] block mt-0.5">Capacidade de entender o cenário e contexto do lead.</span>
-                        </div>
-                        <div class="p-2.5 rounded-lg bg-gray-900/50 border border-gray-800">
-                            <span class="font-bold text-white block">P - Problema (<span id="radar-val-p">0.0</span>)</span>
-                            <span class="text-gray-500 text-[11px] block mt-0.5">Habilidade em investigar e expor as dores latentes.</span>
-                        </div>
-                        <div class="p-2.5 rounded-lg bg-gray-900/50 border border-gray-800">
-                            <span class="font-bold text-white block">I - Implicação (<span id="radar-val-i">0.0</span>)</span>
-                            <span class="text-gray-500 text-[11px] block mt-0.5">Mostrar as consequências de não resolver o problema.</span>
-                        </div>
-                        <div class="p-2.5 rounded-lg bg-gray-900/50 border border-gray-800">
-                            <span class="font-bold text-white block">N - Necessidade de Solução (<span id="radar-val-n">0.0</span>)</span>
-                            <span class="text-gray-500 text-[11px] block mt-0.5">Fazer o lead declarar o valor e fechar o agendamento.</span>
-                        </div>
+                <div class="col-span-2 card-dark p-6 rounded-xl shadow-lg min-h-[400px] flex flex-col">
+                    <h3 class="text-sm font-bold text-white mb-4">
+                        <i class="fa-solid fa-arrow-trend-up text-purple-400 mr-2"></i>Evolução Temporal: Técnica vs Processo
+                    </h3>
+                    <div class="w-full flex-1 relative">
+                        <canvas id="lineChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="tab-equipe" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start"></div>
-
+        <!-- ABA: HISTÓRICO -->
         <div id="tab-auditorias" class="hidden card-dark p-6 rounded-xl shadow-lg">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-list-check text-gray-400"></i> Todas as Chamadas Processadas pela IA</h3>
-                <span class="text-xs text-gray-500 font-semibold" id="contador-historico">0 registros carregados</span>
-            </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-gray-800 text-gray-400 text-xs font-bold uppercase tracking-wider">
+                            <th class="pb-3 pl-2">Data</th>
                             <th class="pb-3">SDR</th>
-                            <th class="pb-3">Data</th>
-                            <th class="pb-3">Título da Chamada</th>
-                            <th class="pb-3">Duração</th>
-                            <th class="pb-3">Nota</th>
-                            <th class="pb-3 text-right">Ação</th>
+                            <th class="pb-3">Produto</th>
+                            <th class="pb-3 text-center">Ritmo (WPS)</th>
+                            <th class="pb-3 text-center">Nota SPIN</th>
+                            <th class="pb-3 text-center">Conformidade</th>
+                            <th class="pb-3 text-right pr-2">Auditoria</th>
                         </tr>
                     </thead>
-                    <tbody id="tabela-todas-auditorias" class="text-sm divide-y divide-gray-800"></tbody>
+                    <tbody id="tabela-historico" class="text-sm divide-y divide-gray-800"></tbody>
                 </table>
             </div>
         </div>
 
+        <!-- ABA: PLAYBOOKS COMPLETO -->
         <div id="tab-playbooks" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="card-dark p-6 rounded-xl shadow-md">
                 <h3 class="text-lg font-black text-indigo-400 border-b border-gray-800 pb-2 mb-4 flex items-center gap-2"><i class="fa-solid fa-compass"></i> S - Perguntas de Situação</h3>
@@ -232,343 +190,400 @@
 
     </div>
 
-    <div id="modal-sdr" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 transition duration-300">
-        <div class="bg-gray-900 border border-gray-800 w-full max-w-6xl rounded-2xl h-[85vh] flex flex-col shadow-2xl relative">
-            
-            <div id="modal-loader" class="hidden absolute inset-0 bg-gray-900/95 z-10 flex items-center justify-center rounded-2xl">
-                <div class="text-indigo-400 flex flex-col items-center">
-                    <i class="fa-solid fa-circle-notch fa-spin text-4xl mb-3"></i>
-                    <span class="text-xs font-bold tracking-widest uppercase text-gray-400">Processando Parecer da IA...</span>
-                </div>
-            </div>
-
-            <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-gray-900 rounded-t-2xl flex-shrink-0">
+    <!-- MODAL DOSSIÊ -->
+    <div id="modal-sdr" class="hidden fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50 transition-opacity">
+        <div class="bg-gray-900 border border-gray-800 w-full max-w-7xl rounded-2xl h-[90vh] flex flex-col shadow-2xl relative">
+            <div class="p-6 border-b border-gray-800 flex justify-between items-center bg-[#111827] rounded-t-2xl flex-shrink-0 shadow-sm z-10">
                 <div>
-                    <h2 id="modal-sdr-name" class="text-2xl font-extrabold text-white tracking-tight">Nome do SDR</h2>
-                    <p class="text-[10px] text-indigo-400 uppercase tracking-widest font-black mt-1">Dossiê de Auditoria Metodológica e Feedback</p>
+                    <h2 id="modal-title" class="text-2xl font-extrabold text-white tracking-tight">Auditoria</h2>
+                    <p id="modal-subtitle" class="text-xs text-indigo-400 font-bold uppercase tracking-widest mt-1">ID: -</p>
                 </div>
-                <button onclick="closeModal()" class="text-gray-400 hover:text-white hover:bg-gray-800 p-2 rounded-xl transition">
-                    <i class="fa-solid fa-xmark text-xl"></i>
-                </button>
+                <div class="flex gap-4 items-center">
+                    <div id="modal-links" class="flex gap-2"></div>
+                    <button onclick="fecharModal()" class="text-gray-400 hover:text-white hover:bg-gray-800 p-2 rounded-xl transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
             </div>
             
             <div class="flex-1 flex overflow-hidden">
-                <div class="w-1/3 border-r border-gray-800 overflow-y-auto p-4 space-y-2 custom-scrollbar bg-gray-900/60" id="modal-lista-chamadas"></div>
-                
-                <div class="w-2/3 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-[#0b0f19]" id="modal-conteudo-chamada">
-                    <div class="text-center text-gray-500 py-20"><i class="fa-solid fa-arrow-left text-2xl block mb-2"></i> Selecione uma chamada ao lado para abrir a auditoria detalhada.</div>
-                </div>
+                <!-- Checklist Matriz -->
+                <div class="w-1/3 border-r border-gray-800 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-gray-900" id="modal-matriz"></div>
+                <!-- Veredito e Transcrição -->
+                <div class="w-2/3 overflow-y-auto p-8 space-y-6 custom-scrollbar bg-[#0b0f19]" id="modal-tecnico"></div>
             </div>
         </div>
     </div>
 
     <script>
-        let database = {};
-        let spiderChartInstance = null;
-        const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+        let database = {}; 
+        let spiderChart, lineChart;
+        let picker;
 
-        // Troca de abas da interface
+        // Inicialização Segura de Datas 
+        const duasSemanasAtras = new Date();
+        duasSemanasAtras.setDate(duasSemanasAtras.getDate() - 14);
+
+        function initCalendario() {
+            picker = flatpickr("#date-range", { 
+                mode: "range", 
+                dateFormat: "Y-m-d", 
+                locale: "pt", 
+                theme: "dark",
+                defaultDate: [duasSemanasAtras, new Date()],
+                onChange: applyFilters
+            });
+        }
+
         function switchTab(tab) {
-            ['geral', 'dash', 'equipe', 'auditorias', 'playbooks'].forEach(t => {
+            const tabs = ['geral', 'dash', 'auditorias', 'playbooks'];
+            
+            tabs.forEach(t => {
                 document.getElementById(`tab-${t}`).classList.add('hidden');
                 document.getElementById(`menu-${t}`).classList.remove('sidebar-active');
             });
+            
             document.getElementById(`tab-${tab}`).classList.remove('hidden');
             document.getElementById(`menu-${tab}`).classList.add('sidebar-active');
             
-            const titles = { geral: "Visão Geral", dash: "Análise de Teia", equipe: "Equipe SDR", auditorias: "Histórico Completo", playbooks: "Playbooks SPIN" };
+            const titles = { 
+                geral: "Visão Geral", 
+                dash: "Dashboard Analytics", 
+                auditorias: "Histórico & Dossiês",
+                playbooks: "Playbooks SPIN"
+            };
+            
             document.getElementById('page-title').innerText = titles[tab];
         }
 
-        // Inicialização com cache-busting obrigatório
         async function init() {
+            initCalendario();
             try {
                 const response = await fetch('consolidated_data.json?v=' + Date.now());
-                if (!response.ok) throw new Error("Erro de arquivo.");
+                if (!response.ok) throw new Error("Ficheiro não encontrado");
                 database = await response.json();
                 
-                buildFilterDropdowns();
+                const sdrs = new Set();
+                Object.values(database).forEach(c => { if(c.sdr) sdrs.add(c.sdr.trim()); });
+                const sel = document.getElementById('filter-sdr');
+                Array.from(sdrs).sort().forEach(s => {
+                    sel.innerHTML += `<option value="${s}">${s}</option>`;
+                });
+                
                 applyFilters();
-            } catch (e) {
-                console.error(e);
-                document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="py-6 text-center text-amber-500 font-semibold bg-amber-950/10 border border-amber-900/30 rounded-lg">Aguardando a gravação da primeira linha válida no arquivo consolidated_data.json...</td></tr>`;
+            } catch (e) { 
+                console.error("Aguardando dados iniciais...", e);
+                document.getElementById('tabela-historico').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="py-6 text-center text-gray-500">
+                            Aguardando a primeira execução do robô para popular os dados.
+                        </td>
+                    </tr>
+                `;
             }
         }
 
-        // Suporte avançado multi-formato para ler datas americanas e brasileiras
-        function extractDateInfo(dateStr) {
-            if (!dateStr) return { year: null, monthName: null };
-            try {
-                let pureDate = dateStr.split(' ')[0].replace(/\//g, '-'); // limpa espaços de horas
-                let parts = pureDate.split('-');
-                if (parts.length === 3) {
-                    // Se o primeiro bloco tem 4 dígitos, é americano (YYYY-MM-DD), senão é brasileiro (DD-MM-YYYY)
-                    if (parts[0].length === 4) {
-                        let monthIdx = parseInt(parts[1]) - 1;
-                        return { year: parts[0], monthName: monthNames[monthIdx] };
-                    } else {
-                        let monthIdx = parseInt(parts[1]) - 1;
-                        return { year: parts[2], monthName: monthNames[monthIdx] };
-                    }
-                }
-            } catch (e) {}
-            return { year: null, monthName: null };
-        }
-
-        // População dos seletores de filtragem
-        function buildFilterDropdowns() {
-            const chamadas = Object.values(database);
-            const anos = new Set(); const meses = new Set(); const sdrs = new Set();
-            
-            chamadas.forEach(c => {
-                if (c.sdr) sdrs.add(c.sdr.strip ? c.sdr.strip() : c.sdr);
-                const info = extractDateInfo(c.data);
-                if (info.year) anos.add(info.year);
-                if (info.monthName) meses.add(info.monthName);
-            });
-
-            const populateSelect = (id, items) => {
-                const select = document.getElementById(id);
-                select.innerHTML = select.options[0].outerHTML;
-                Array.from(items).sort().forEach(item => {
-                    const opt = document.createElement('option'); opt.value = item; opt.innerText = item; select.appendChild(opt);
-                });
-            };
-            populateSelect('filter-ano', anos); populateSelect('filter-mes', meses); populateSelect('filter-sdr', sdrs);
-        }
-
-        // Aplicação em cascata dos filtros nos componentes
         function applyFilters() {
-            const anoSel = document.getElementById('filter-ano').value;
-            const mesSel = document.getElementById('filter-mes').value;
             const sdrSel = document.getElementById('filter-sdr').value;
+            const dates = picker.selectedDates;
             
             let filtrados = Object.values(database).filter(c => {
-                let matchAno = true; let matchMes = true; let matchSdr = true;
-                if (sdrSel !== 'todos' && c.sdr !== sdrSel) matchSdr = false;
-                const info = extractDateInfo(c.data);
-                if (anoSel !== 'todos' && info.year !== anoSel) matchAno = false;
-                if (mesSel !== 'todos' && info.monthName !== mesSel) matchMes = false;
-                return matchAno && matchMes && matchSdr;
+                if (sdrSel !== 'todos' && c.sdr !== sdrSel) return false;
+                
+                if (dates.length === 2 && c.data) {
+                    try {
+                        let dataStr = c.data.split(' ')[0]; // Pega só a data
+                        let partes = dataStr.includes('/') ? dataStr.split('/') : dataStr.split('-');
+                        let cDate;
+                        // Tenta descobrir se é YYYY-MM-DD ou DD-MM-YYYY
+                        if(partes[0].length === 4) {
+                            cDate = new Date(partes[0], partes[1]-1, partes[2]);
+                        } else {
+                            cDate = new Date(partes[2], partes[1]-1, partes[0]);
+                        }
+                        
+                        // Zera as horas para comparar apenas os dias exatos
+                        cDate.setHours(0,0,0,0);
+                        const dStart = new Date(dates[0]); dStart.setHours(0,0,0,0);
+                        const dEnd = new Date(dates[1]); dEnd.setHours(23,59,59,999);
+                        
+                        if (cDate < dStart || cDate > dEnd) return false;
+                    } catch(e){}
+                }
+                return true;
             });
 
-            renderDashboardMetrics(filtrados);
-            renderSpiderChart(filtrados);
+            renderGeral(filtrados);
+            renderCharts(filtrados);
+            renderTabela(filtrados);
         }
 
-        // Renderização e cálculo matemático do Gráfico de Teia (Radar)
-        function renderSpiderChart(chamadas) {
-            let avgS = 0, avgP = 0, avgI = 0, avgN = 0;
-            
-            if (chamadas.length > 0) {
-                // Se o JSON antigo não tiver as quebras de notas de pilar específicas, cai no fallback da nota global
-                avgS = chamadas.reduce((acc, c) => acc + (parseFloat(c.nota_s) !== undefined ? parseFloat(c.nota_s) : parseFloat(c.nota_spin) || 0), 0) / chamadas.length;
-                avgP = chamadas.reduce((acc, c) => acc + (parseFloat(c.nota_p) !== undefined ? parseFloat(c.nota_p) : parseFloat(c.nota_spin) || 0), 0) / chamadas.length;
-                avgI = chamadas.reduce((acc, c) => acc + (parseFloat(c.nota_i) !== undefined ? parseFloat(c.nota_i) : parseFloat(c.nota_spin) || 0), 0) / chamadas.length;
-                avgN = chamadas.reduce((acc, c) => acc + (parseFloat(c.nota_n) !== undefined ? parseFloat(c.nota_n) : parseFloat(c.nota_spin) || 0), 0) / chamadas.length;
+        function renderGeral(dados) {
+            if(!dados.length) {
+                document.getElementById('media-spin').innerText = "0.0";
+                document.getElementById('media-op').innerText = "0.0";
+                document.getElementById('media-wps').innerText = "0.0";
+                document.getElementById('casos-criticos').innerText = "0";
+                document.getElementById('grid-equipe').innerHTML = "";
+                return;
             }
+            
+            const t = dados.length;
+            const sumS = dados.reduce((a,c)=>a+(parseFloat(c.nota_spin)||0),0)/t;
+            const sumO = dados.reduce((a,c)=>a+(parseFloat(c.nota_op)||0),0)/t;
+            const sumW = dados.reduce((a,c)=>a+(parseFloat(c.wps)||0),0)/t;
+            const criticos = dados.filter(c => c.urgencia === "SIM").length;
 
-            // Atualiza os numerais de apoio abaixo do radar
-            document.getElementById('radar-val-s').innerText = avgS.toFixed(1);
-            document.getElementById('radar-val-p').innerText = avgP.toFixed(1);
-            document.getElementById('radar-val-i').innerText = avgI.toFixed(1);
-            document.getElementById('radar-val-n').innerText = avgN.toFixed(1);
+            document.getElementById('media-spin').innerText = sumS.toFixed(1);
+            document.getElementById('media-op').innerText = sumO.toFixed(1);
+            document.getElementById('media-wps').innerText = sumW.toFixed(2);
+            document.getElementById('casos-criticos').innerText = criticos;
 
-            const ctx = document.getElementById('spiderChart').getContext('2d');
-            if (spiderChartInstance) spiderChartInstance.destroy();
+            // Renderiza Cards da Equipe
+            const dictSDR = {};
+            dados.forEach(c => { 
+                dictSDR[c.sdr] = dictSDR[c.sdr] || []; 
+                dictSDR[c.sdr].push(c); 
+            });
+            
+            const grid = document.getElementById('grid-equipe');
+            grid.innerHTML = "";
+            
+            Object.keys(dictSDR).sort().forEach(nome => {
+                const chamadas = dictSDR[nome];
+                const mSpin = chamadas.reduce((a,c)=>a+(parseFloat(c.nota_spin)||0),0)/chamadas.length;
+                const mOp = chamadas.reduce((a,c)=>a+(parseFloat(c.nota_op)||0),0)/chamadas.length;
+                
+                grid.innerHTML += `
+                    <div class="card-dark p-5 rounded-xl shadow hover:border-indigo-500/50 transition cursor-pointer" onclick="document.getElementById('filter-sdr').value='${nome}'; applyFilters();">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center font-bold text-white shadow">
+                                ${nome.substring(0,2).toUpperCase()}
+                            </div>
+                            <h4 class="font-bold text-white text-sm">${nome}</h4>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-center">
+                            <div class="bg-gray-900/50 rounded p-2">
+                                <span class="text-[9px] text-gray-500 uppercase block font-bold">SPIN</span>
+                                <span class="text-lg font-black text-indigo-400">${mSpin.toFixed(1)}</span>
+                            </div>
+                            <div class="bg-gray-900/50 rounded p-2">
+                                <span class="text-[9px] text-gray-500 uppercase block font-bold">Operacional</span>
+                                <span class="text-lg font-black text-purple-400">${mOp.toFixed(1)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
 
-            spiderChartInstance = new Chart(ctx, {
+        function renderCharts(dados) {
+            let S=0, P=0, I=0, N=0;
+            if(dados.length) {
+                S = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.s)||0),0)/dados.length;
+                P = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.p)||0),0)/dados.length;
+                I = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.i)||0),0)/dados.length;
+                N = dados.reduce((a,c)=>a+(parseFloat(c.notas_s_p_i_n?.n)||0),0)/dados.length;
+            }
+            if(spiderChart) spiderChart.destroy();
+            spiderChart = new Chart(document.getElementById('spiderChart'), {
                 type: 'radar',
-                data: {
-                    labels: ['Situação (S)', 'Problema (P)', 'Implicação (I)', 'Necessidade (N)'],
-                    datasets: [{
-                        label: 'Aderência Média',
-                        data: [avgS.toFixed(1), avgP.toFixed(1), avgI.toFixed(1), avgN.toFixed(1)],
-                        backgroundColor: 'rgba(99, 102, 241, 0.15)',
-                        borderColor: '#6366f1',
-                        borderWidth: 2,
-                        pointBackgroundColor: '#818cf8',
-                        pointBorderColor: '#111827',
-                        pointHoverBackgroundColor: '#ffffff',
-                        pointRadius: 4
-                    }]
+                data: { 
+                    labels: ['S (Situação)', 'P (Problema)', 'I (Implicação)', 'N (Necessidade)'], 
+                    datasets: [{ 
+                        data: [S, P, I, N], 
+                        backgroundColor: 'rgba(99,102,241,0.2)', 
+                        borderColor: '#6366f1', 
+                        pointBackgroundColor: '#818cf8', 
+                        borderWidth: 2 
+                    }] 
                 },
-                options: {
-                    scales: {
-                        r: {
-                            angleLines: { color: '#1f2937' },
-                            grid: { color: '#1f2937' },
-                            pointLabels: { color: '#9ca3af', font: { size: 10, weight: '700' } },
-                            ticks: { display: false },
-                            suggestedMin: 0, suggestedMax: 10
-                        }
+                options: { 
+                    scales: { 
+                        r: { 
+                            min: 0, 
+                            max: 10, 
+                            angleLines: {color: '#1f2937'}, 
+                            grid: {color: '#1f2937'}, 
+                            pointLabels: {color: '#9ca3af', font: {size: 11, weight: 'bold'}} 
+                        } 
+                    }, 
+                    plugins: { legend: {display: false} } 
+                }
+            });
+
+            // Ordena dados por data (do mais antigo para o mais recente para a linha de evolução)
+            const dadosCronologicos = [...dados].sort((a,b) => new Date(a.data.split(' ')[0]) - new Date(b.data.split(' ')[0]));
+            
+            const labels = dadosCronologicos.map(c => c.data.split(' ')[0]);
+            const n_spin = dadosCronologicos.map(c => c.nota_spin);
+            const n_op = dadosCronologicos.map(c => c.nota_op);
+            
+            if(lineChart) lineChart.destroy();
+            lineChart = new Chart(document.getElementById('lineChart'), {
+                type: 'line',
+                data: { 
+                    labels, 
+                    datasets: [
+                        { label: 'Nota SPIN', data: n_spin, borderColor: '#6366f1', backgroundColor: '#6366f1', tension: 0.3, borderWidth: 2, pointRadius: 3 },
+                        { label: 'Nota Operacional', data: n_op, borderColor: '#a855f7', backgroundColor: '#a855f7', tension: 0.3, borderWidth: 2, pointRadius: 3 }
+                    ]
+                },
+                options: { 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        y: { min: 0, max: 10, grid: {color: '#1f2937'} }, 
+                        x: { grid: {color: '#1f2937'}, ticks: {display: false} } 
                     },
-                    plugins: { legend: { display: false } },
-                    responsive: true,
-                    maintainAspectRatio: false
+                    plugins: { legend: { position: 'bottom', labels: {color: '#9ca3af', boxWidth: 12} } }
                 }
             });
         }
 
-        // Renderização dos contadores e tabelas de dados
-        function renderDashboardMetrics(chamadas) {
-            if (chamadas.length === 0) {
-                document.getElementById('total-ligacoes').innerText = "0";
-                document.getElementById('media-geral').innerText = "0.0";
-                document.getElementById('casos-criticos').innerText = "0";
-                document.getElementById('taxa-aproveitamento').innerText = "0%";
-                document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500">Nenhum registro encontrado.</td></tr>`;
-                document.getElementById('tabela-todas-auditorias').innerHTML = `<tr><td colspan="6" class="py-4 text-center text-gray-500">Nenhum registro encontrado.</td></tr>`;
-                document.getElementById('tab-equipe').innerHTML = '';
-                document.getElementById('contador-historico').innerText = "0 registros carregados";
-                return;
-            }
-
-            const total = chamadas.length;
-            const mediaGlobal = (chamadas.reduce((acc, c) => acc + (parseFloat(c.nota_spin) || 0), 0) / total).toFixed(1);
-            const criticos = chamadas.filter(c => (parseFloat(c.nota_spin) || 0) < 6.0).length;
-            const aproveitamento = Math.round((mediaGlobal / 10) * 100);
-
-            document.getElementById('total-ligacoes').innerText = total;
-            document.getElementById('media-geral').innerText = mediaGlobal;
-            document.getElementById('casos-criticos').innerText = criticos;
-            document.getElementById('taxa-aproveitamento').innerText = `${aproveitamento}%`;
-            document.getElementById('contador-historico').innerText = `${total} registros carregados`;
-
-            // Construção das equipes e cards
-            const sdrs = {};
-            chamadas.forEach(c => { if (c.sdr) sdrs[c.sdr] = sdrs[c.sdr] || []; sdrs[c.sdr].push(c); });
-            const gridEquipe = document.getElementById('tab-equipe'); gridEquipe.innerHTML = '';
+        function renderTabela(dados) {
+            const tb = document.getElementById('tabela-historico'); 
+            tb.innerHTML = '';
             
-            Object.keys(sdrs).sort().forEach(nome => {
-                const lista = sdrs[nome];
-                const mediaSDR = (lista.reduce((acc, c) => acc + (parseFloat(c.nota_spin) || 0), 0) / lista.length).toFixed(1);
-                let iniciais = nome.substring(0, 2).toUpperCase();
-                
-                const card = document.createElement('div');
-                card.className = "card-dark p-6 rounded-xl shadow-lg cursor-pointer hover:border-indigo-500/60 transition group";
-                card.onclick = () => openSDRModal(nome);
-                card.innerHTML = `
-                    <div class="flex items-center gap-4 mb-5">
-                        <div class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center font-extrabold text-white text-xl shadow-md group-hover:scale-105 transition duration-200">${iniciais}</div>
-                        <div>
-                            <h4 class="font-bold text-white text-base group-hover:text-indigo-400 transition">${nome}</h4>
-                            <span class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider">Inside Sales SDR</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4 border-t border-gray-800 pt-4">
-                        <div class="bg-gray-900/40 p-3 rounded-lg border border-gray-800/50"><span class="text-[9px] uppercase tracking-wider text-gray-500 font-bold block">Chamadas</span><p class="text-2xl font-black text-white mt-0.5">${lista.length}</p></div>
-                        <div class="bg-gray-900/40 p-3 rounded-lg border border-gray-800/50"><span class="text-[9px] uppercase tracking-wider text-gray-500 font-bold block">Média Geral</span><p class="text-2xl font-black mt-0.5 ${mediaSDR < 6 ? 'text-rose-400' : 'text-emerald-400'}">${mediaSDR}</p></div>
-                    </div>`;
-                gridEquipe.appendChild(card);
-            });
+            if(!dados.length) { 
+                tb.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-gray-500">Nenhum registo encontrado no período selecionado.</td></tr>`; 
+                return; 
+            }
 
-            // Geração de Casos Críticos por Ordem de Pior Nota Absoluta
-            const tabelaCriticos = document.getElementById('tabela-criticos'); tabelaCriticos.innerHTML = '';
-            const listaCriticos = chamadas.filter(c => (parseFloat(c.nota_spin) || 0) < 6.0).sort((a,b) => parseFloat(a.nota_spin) - parseFloat(b.nota_spin));
+            dados.sort((a,b)=>b.id - a.id).forEach(c => {
+                const wColor = c.wps < 1.5 || c.wps > 2.5 ? 'text-amber-400' : 'text-emerald-400';
+                tb.innerHTML += `
+                <tr class="border-b border-gray-800/50 hover:bg-gray-800/30 transition text-xs">
+                    <td class="py-3.5 pl-2 text-gray-400 font-mono">${c.data}</td>
+                    <td class="py-3.5 font-bold text-white flex items-center gap-2">
+                        ${c.urgencia==="SIM"?'<i class="fa-solid fa-fire text-rose-500" title="Alerta Crítico"></i>':''}
+                        ${c.sdr}
+                    </td>
+                    <td class="py-3.5"><span class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-gray-300 font-semibold">${c.produto}</span></td>
+                    <td class="py-3.5 text-center font-mono font-bold ${wColor}">${parseFloat(c.wps).toFixed(2)}</td>
+                    <td class="py-3.5 text-center">
+                        <span class="px-2 py-0.5 rounded bg-indigo-950/30 text-indigo-400 border border-indigo-900/50 font-bold">${parseFloat(c.nota_spin).toFixed(1)}</span>
+                    </td>
+                    <td class="py-3.5 text-center">
+                        <span class="px-2 py-0.5 rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 font-bold">${parseFloat(c.nota_op).toFixed(1)}</span>
+                    </td>
+                    <td class="py-3.5 text-right pr-2">
+                        <button onclick="abrirDossie('${c.id}')" class="text-indigo-400 font-bold hover:text-white transition">Análise</button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        function getBadge(resp) {
+            if(resp==="Sim") return '<span class="badge-sim px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider">Sim</span>';
+            if(resp==="Não") return '<span class="badge-nao px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider">Não</span>';
+            return '<span class="badge-na px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider">N/A</span>';
+        }
+
+        function fecharModal() {
+            document.getElementById('modal-sdr').classList.add('hidden');
+        }
+
+        function abrirDossie(id) {
+            const c = database[id];
+            document.getElementById('modal-title').innerText = `Auditoria: ${c.sdr}`;
+            document.getElementById('modal-subtitle').innerText = `ID: ${c.id} | Produto: ${c.produto} | Duração: ${c.duracao}`;
             
-            if (listaCriticos.length === 0) {
-                tabelaCriticos.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-gray-500 text-xs">Nenhum sdr em estado crítico sob estes filtros. Excelente!</td></tr>`;
-            } else {
-                listaCriticos.forEach(c => {
-                    const tr = document.createElement('tr'); tr.className = "border-b border-gray-800/60 hover:bg-gray-800/20 transition text-xs";
-                    tr.innerHTML = `
-                        <td class="py-3.5 font-bold text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-500"></span> ${c.sdr}</td>
-                        <td class="py-3.5 text-gray-400">${c.data}</td>
-                        <td class="py-3.5 text-gray-400 font-mono">${c.duracao}</td>
-                        <td class="py-3.5"><span class="px-2 py-0.5 rounded font-extrabold bg-rose-950/50 text-rose-400 border border-rose-900/40">${parseFloat(c.nota_spin).toFixed(1)}</span></td>
-                        <td class="py-3.5 text-right"><button onclick="openSDRModal('${c.sdr}', '${c.id}')" class="text-indigo-400 hover:text-white font-bold transition">Abrir Dossiê</button></td>`;
-                    tabelaCriticos.appendChild(tr);
-                });
-            }
+            document.getElementById('modal-links').innerHTML = `
+                ${c.deal_url ? `<a href="${c.deal_url}" target="_blank" class="bg-gray-800 hover:bg-gray-700 text-white text-xs px-3 py-2 rounded-lg border border-gray-700 transition font-bold shadow"><i class="fa-solid fa-arrows-spin mr-1"></i> Negócio</a>` : ''}
+                <a href="${c.audio_url}" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg transition font-bold shadow"><i class="fa-solid fa-play mr-1"></i> HubSpot</a>
+            `;
 
-            // Histórico Completo de Ligações
-            const tabelaHistorico = document.getElementById('tabela-todas-auditorias'); tabelaHistorico.innerHTML = '';
-            chamadas.sort((a,b) => b.id - a.id).forEach(c => {
-                const nota = parseFloat(c.nota_spin) || 0;
-                const tr = document.createElement('tr'); tr.className = "border-b border-gray-800/60 hover:bg-gray-800/20 transition text-xs";
-                tr.innerHTML = `
-                    <td class="py-3.5 font-semibold text-white">${c.sdr}</td>
-                    <td class="py-3.5 text-gray-400">${c.data}</td>
-                    <td class="py-3.5 text-gray-300 max-w-xs truncate font-medium">${c.titulo}</td>
-                    <td class="py-3.5 text-gray-400 font-mono">${c.duracao}</td>
-                    <td class="py-3.5"><span class="px-2 py-0.5 rounded font-extrabold ${nota < 6.0 ? 'bg-rose-950/50 text-rose-400 border border-rose-900/40' : 'bg-emerald-950/50 text-emerald-400 border border-emerald-900/40'}">${nota.toFixed(1)}</span></td>
-                    <td class="py-3.5 text-right"><button onclick="openSDRModal('${c.sdr}', '${c.id}')" class="text-indigo-400 hover:text-white font-bold transition">Análise completa</button></td>`;
-                tabelaHistorico.appendChild(tr);
-            });
-        }
-
-        // Abertura do Dossiê do SDR com controle de carregamento lateral
-        function openSDRModal(nome, callIdToSelect = null) {
-            const modal = document.getElementById('modal-sdr');
-            document.getElementById('modal-sdr-name').innerText = nome;
-            const listaContainer = document.getElementById('modal-lista-chamadas'); listaContainer.innerHTML = '';
-
-            const listaFiltrada = Object.values(database).filter(c => c.sdr === nome).sort((a,b) => b.id - a.id);
-            listaFiltrada.forEach(c => {
-                const btn = document.createElement('button'); btn.id = `btn-call-${c.id}`;
-                btn.className = "call-list-btn w-full text-left p-3 rounded-xl bg-gray-800/20 border border-gray-800/60 transition flex justify-between items-center mb-2 hover:border-gray-700 focus:outline-none";
-                btn.onclick = () => {
-                    document.querySelectorAll('.call-list-btn').forEach(b => b.classList.remove('bg-indigo-950/40', 'border-indigo-800/60'));
-                    btn.classList.add('bg-indigo-950/40', 'border-indigo-800/60');
-                    selectCallInModal(c);
-                };
-                btn.innerHTML = `<div><p class="font-bold text-white text-xs">ID: ${c.id}</p><p class="text-[10px] text-gray-500 mt-0.5 font-medium">${c.data}</p></div><span class="font-black text-sm ${c.nota_spin < 6.0 ? 'text-rose-400' : 'text-emerald-400'}">${parseFloat(c.nota_spin).toFixed(1)}</span>`;
-                listaContainer.appendChild(btn);
-            });
-
-            modal.classList.remove('hidden');
-            if (callIdToSelect) {
-                setTimeout(() => { const b = document.getElementById(`btn-call-${callIdToSelect}`); if(b) b.click(); }, 80);
-            } else if (listaFiltrada.length > 0) {
-                setTimeout(() => { const b = document.getElementById(`btn-call-${listaFiltrada[0].id}`); if(b) b.click(); }, 80);
-            }
-        }
-
-        // Renderização dos campos internos de Parecer, Erro e Transcrição dentro do Modal
-        function selectCallInModal(c) {
-            const loader = document.getElementById('modal-loader'); loader.classList.remove('hidden');
-            setTimeout(() => {
-                const conteudo = document.getElementById('modal-conteudo-chamada');
-                const notaNum = parseFloat(c.nota_spin) || 0;
+            let f = c.formulario || {};
+            const itemHTML = (label, obj) => `
+                <div class="bg-gray-900/50 border border-gray-800 p-3 rounded-xl mb-2 hover:border-gray-700 transition">
+                    <div class="flex justify-between items-start mb-1.5">
+                        <span class="text-xs font-bold text-gray-300 leading-tight">${label}</span>
+                        ${getBadge(obj?.r)}
+                    </div>
+                    ${obj?.e && obj?.e !== "..." ? `<p class="text-[10px] text-gray-500 italic border-l-2 border-gray-700 pl-2 mt-2 leading-relaxed">"${obj.e}"</p>` : ''}
+                </div>`;
+            
+            document.getElementById('modal-matriz').innerHTML = `
+                <div class="mb-8">
+                    <h3 class="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-ear-listen"></i> Escuta & Adaptação
+                    </h3>
+                    ${itemHTML('Escuta Ativa', f.escuta)}
+                    ${itemHTML('Validação', f.validacao)}
+                    ${itemHTML('Compreensão', f.compreensao)}
+                    ${itemHTML('Contorno de Objeções', f.objecoes)}
+                </div>
                 
-                conteudo.innerHTML = `
-                    <div class="flex justify-between items-start border-b border-gray-800 pb-4">
-                        <div>
-                            <span class="bg-gray-800 text-gray-400 text-[10px] font-bold px-2 py-0.5 rounded border border-gray-700 font-mono">LINK DE GRAVAÇÃO</span>
-                            <h3 class="text-lg font-extrabold text-white mt-1.5 tracking-tight">${c.titulo}</h3>
-                        </div>
-                        <a href="${c.audio_url}" target="_blank" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-xl font-bold transition flex items-center gap-2 shadow-md shadow-indigo-500/10"><i class="fa-solid fa-circle-play"></i> Ouvir no HubSpot</a>
-                    </div>
-                    
-                    <div class="grid grid-cols-4 gap-2.5 mt-2">
-                        <div class="bg-gray-900 border border-gray-800 p-2 rounded-lg text-center"><span class="text-[9px] uppercase tracking-wider text-gray-500 font-bold block">Situação (S)</span><span class="text-sm font-black text-white mt-0.5 block">${parseFloat(c.nota_s || c.nota_spin).toFixed(1)}</span></div>
-                        <div class="bg-gray-900 border border-gray-800 p-2 rounded-lg text-center"><span class="text-[9px] uppercase tracking-wider text-gray-500 font-bold block">Problema (P)</span><span class="text-sm font-black text-white mt-0.5 block">${parseFloat(c.nota_p || c.nota_spin).toFixed(1)}</span></div>
-                        <div class="bg-gray-900 border border-gray-800 p-2 rounded-lg text-center"><span class="text-[9px] uppercase tracking-wider text-gray-500 font-bold block">Implicação (I)</span><span class="text-sm font-black text-white mt-0.5 block">${parseFloat(c.nota_i || c.nota_spin).toFixed(1)}</span></div>
-                        <div class="bg-gray-900 border border-gray-800 p-2 rounded-lg text-center"><span class="text-[9px] uppercase tracking-wider text-gray-500 font-bold block">Necessidade (N)</span><span class="text-sm font-black text-white mt-0.5 block">${parseFloat(c.nota_n || c.nota_spin).toFixed(1)}</span></div>
-                    </div>
+                <div class="mb-8">
+                    <h3 class="text-[10px] font-black text-purple-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-comments"></i> Comunicação
+                    </h3>
+                    ${itemHTML('Linguagem/Vícios', f.linguagem)}
+                    ${itemHTML('Receptividade', f.receptividade)}
+                    ${itemHTML('Rapport', f.rapport)}
+                    ${itemHTML('Discurso e Tom', f.discurso)}
+                    ${itemHTML('Clareza', f.clareza)}
+                </div>
+                
+                <div>
+                    <h3 class="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-check-double"></i> Regras (${c.produto})
+                    </h3>
+                    ${itemHTML('Coleta de SLA', f.sla)}
+                    ${itemHTML('SPIN (3 etapas)', f.spin)}
+                    ${itemHTML('Uso da Dor', f.dor)}
+                    ${itemHTML('Gestão/Preço', f.gestao)}
+                    ${itemHTML('Passos RO (Computador)', f.passos_ro)}
+                    ${itemHTML('Venda do Produto', f.produto)}
+                    ${itemHTML('Gatilhos Mentais', f.gatilhos)}
+                </div>
+            `;
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-gavel"></i> Parecer do Auditor Técnico</h4>
-                            <div class="bg-gray-900 border border-gray-800/80 p-4 rounded-xl text-xs leading-relaxed text-gray-300 whitespace-pre-line font-medium shadow-inner h-[180px] overflow-y-auto custom-scrollbar">${c.avaliacao}</div>
-                        </div>
-                        <div class="space-y-2">
-                            <h4 class="text-xs font-bold uppercase tracking-wider flex items-center gap-1 ${notaNum < 6.0 ? 'text-rose-400' : 'text-emerald-400'}">
-                                <i class="fa-solid fa-lightbulb"></i> Diagnóstico de Erros & Melhorias
-                            </h4>
-                            <div class="p-4 rounded-xl text-xs leading-relaxed shadow-inner h-[180px] overflow-y-auto custom-scrollbar border ${notaNum < 6.0 ? 'bg-rose-950/10 border-rose-900/30 text-rose-100/90' : 'bg-emerald-950/10 border-emerald-900/30 text-emerald-100/90'}">${c.sugestoes}</div>
-                        </div>
+            document.getElementById('modal-tecnico').innerHTML = `
+                <div class="grid grid-cols-3 gap-4 mb-6">
+                    <div class="bg-indigo-950/20 border border-indigo-900/30 p-4 rounded-xl text-center shadow-inner">
+                        <span class="text-[10px] font-black tracking-widest text-indigo-400 uppercase block mb-1">Aderência SPIN</span>
+                        <span class="text-3xl font-black text-white">${parseFloat(c.nota_spin).toFixed(1)}</span>
                     </div>
-                    <div class="space-y-2 mt-4 pt-4 border-t border-gray-800">
-                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1"><i class="fa-solid fa-file-lines"></i> Transcrição Integral da Chamada (Captura Whisper)</h4>
-                        <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl text-[11px] text-gray-400 h-32 overflow-y-auto custom-scrollbar leading-relaxed whitespace-pre-line font-medium">${c.transcricao}</div>
-                    </div>`;
-                loader.classList.add('hidden');
-            }, 200);
+                    <div class="bg-purple-950/20 border border-purple-900/30 p-4 rounded-xl text-center shadow-inner">
+                        <span class="text-[10px] font-black tracking-widest text-purple-400 uppercase block mb-1">Matriz Sonia</span>
+                        <span class="text-3xl font-black text-white">${parseFloat(c.nota_op).toFixed(1)}</span>
+                    </div>
+                    <div class="bg-emerald-950/20 border border-emerald-900/30 p-4 rounded-xl text-center shadow-inner">
+                        <span class="text-[10px] font-black tracking-widest text-emerald-400 uppercase block mb-1">Ritmo (WPS)</span>
+                        <span class="text-3xl font-black text-white">${parseFloat(c.wps).toFixed(2)}</span>
+                    </div>
+                </div>
+                
+                <div class="space-y-3 mb-6">
+                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-gavel text-indigo-400"></i> Parecer do Auditor Técnico
+                    </h4>
+                    <div class="bg-gray-900 border border-gray-800 p-5 rounded-xl text-xs text-gray-300 whitespace-pre-line leading-relaxed shadow-inner font-medium">
+                        ${c.parecer || 'Sem parecer gerado.'}
+                    </div>
+                </div>
+                
+                <div class="space-y-3 mb-6">
+                    <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-bullseye text-rose-400"></i> Plano de Ação & Desvios
+                    </h4>
+                    <div class="bg-rose-950/10 border border-rose-900/30 p-5 rounded-xl text-xs text-rose-100/90 whitespace-pre-line leading-relaxed shadow-inner font-medium">
+                        ${c.sugestoes || 'Sem plano traçado.'}
+                    </div>
+                </div>
+                
+                <div class="space-y-3 mt-8 border-t border-gray-800 pt-6">
+                    <h4 class="text-[10px] font-black text-gray-600 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-file-lines"></i> Transcrição Original
+                    </h4>
+                    <div class="bg-gray-900/50 border border-gray-800 p-5 rounded-xl text-[11px] text-gray-500 h-48 overflow-y-auto custom-scrollbar leading-relaxed whitespace-pre-line">
+                        ${c.transcricao}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('modal-sdr').classList.remove('hidden');
         }
 
-        function closeModal() { document.getElementById('modal-sdr').classList.add('hidden'); }
         window.onload = init;
     </script>
 </body>
