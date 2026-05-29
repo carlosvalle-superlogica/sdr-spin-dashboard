@@ -62,18 +62,17 @@ def process_all_calls():
             print("Aviso: O arquivo JSON estava vazio ou inválido. Iniciando um novo.")
             db = {}
 
-    # Abrimos o arquivo para detecção de delimitador e fechamos imediatamente
+    # Detecta delimitador de forma isolada
     with open(CSV_FILE, mode='r', encoding='utf-8-sig') as f:
         sample = f.read(2048)
         delimiter = ';' if ';' in sample else ','
     
-    # Reabrimos o arquivo de forma limpa para o DictReader não perder o cabeçalho
+    # Executa a leitura oficial
     with open(CSV_FILE, mode='r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f, delimiter=delimiter)
         linhas_processadas = 0
         
         print(f"Layout detectado. Separador utilizado: '{delimiter}'")
-        print(f"Campos encontrados na planilha: {reader.fieldnames}")
         
         for row in reader:
             call_id = row.get("ID do objeto")
@@ -84,7 +83,6 @@ def process_all_calls():
             duration = row.get("Duração da chamada (HH:mm:ss)") or "00:00"
             title = row.get("Título da chamada") or "Chamada de Vendas"
 
-            # Filtros rígidos de validação de linha
             if not call_id or not audio_url or not audio_url.startswith("http"):
                 continue
             
@@ -92,7 +90,6 @@ def process_all_calls():
                 continue
 
             if call_id in db:
-                print(f"-> [CACHE] Ignorando ID {call_id} (Já processado anteriormente)")
                 continue
 
             print(f"-> [NOVA LIGAÇÃO] Iniciando ID {call_id} | SDR: {sdr_name}...")
@@ -123,8 +120,9 @@ def process_all_calls():
                     "{\"nota_spin\": 8.5, \"avaliacao\": \"texto\", \"sugestoes\": \"texto\"}"
                 )
 
+                # ATUALIZADO PARA O MODELO ATIVO DA API DO GROQ
                 chat_completion = client.chat.completions.create(
-                    model="llama3-70b-8192",
+                    model="llama-3.1-70b-versatile",
                     messages=[
                         {"role": "system", "content": prompt_sistema},
                         {"role": "user", "content": f"Transcrição:\n\n{texto_ligacao}"}
@@ -156,7 +154,6 @@ def process_all_calls():
                 
                 linhas_processadas += 1
                 
-                # Escrita imediata e forçada no disco
                 with open(CONSOLIDATED_FILE, 'w', encoding='utf-8') as sf:
                     json.dump(db, sf, ensure_ascii=False, indent=4)
 
@@ -175,7 +172,7 @@ def process_all_calls():
                 time.sleep(3)
                 continue
 
-    print(f"\n✅ EXECUÇÃO FINALIZADA: {linhas_processadas} novas chamadas gravadas com sucesso no arquivo!")
+    print(f"\n✅ EXECUÇÃO FINALIZADA: {linhas_processadas} novas chamadas gravadas com sucesso!")
 
 if __name__ == "__main__":
     try:
