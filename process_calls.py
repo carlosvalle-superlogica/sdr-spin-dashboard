@@ -194,35 +194,58 @@ def process_all_calls():
                 # --------------------------------------------------
                 print(" -> Executando Agente 1: Auditoria de Processos...")
                 prompt_agente1 = f"""
-                Você é o Agente 1: Auditor de Processos Rígido. Avalie se o SDR seguiu estritamente as regras de negócio de {produto_detectado}.
-                Seja agressivo. Só marque "Sim" se houver prova clara e incontestável na transcrição. Menções superficiais devem ser marcadas como "Não".
+                Você é o Agente 1: Auditor de Processos Rígido. Sua missão é ler a transcrição e avaliar a Conformidade Operacional.
+                PROIBIDO INVENTAR OU COPIAR O EXEMPLO. Você DEVE julgar cada item verdadeiramente com base na transcrição.
+
+                CRITÉRIOS DE AVALIAÇÃO OBRIGATÓRIOS:
+                [1. ESCUTA E ADAPTAÇÃO]
+                - escuta: O SDR ouviu o cliente sem interrupções bruscas?
+                - validacao: O SDR confirmou as respostas do cliente (ex: "Então o seu cenário atual é...")?
+                - compreensao: O SDR entendeu o contexto de primeira, sem fazer a mesma pergunta duas vezes?
+                - objecoes: O SDR conseguiu contornar objeções de forma inteligente? (Marque "N/A" se não houve objeção).
+
+                [2. COMUNICAÇÃO]
+                - linguagem: O SDR usou vocabulário profissional, sem vícios de linguagem excessivos (né, tipo, tá)?
+                - receptividade: O SDR foi cordial, receptivo e enérgico no tom de voz?
+                - rapport: O SDR gerou uma conexão inicial genuína em vez de parecer um robô lendo roteiro?
+                - discurso: O tom de voz transmitiu firmeza e autoridade?
+                - compreensao_cliente: O cliente demonstrou entender o SDR sem pedir para repetir?
+                - clareza: As perguntas do SDR foram diretas, claras e fáceis de responder?
+
+                [3. PROCESSO DE QUALIFICAÇÃO]
+                - sla: O SDR qualificou o SLA mínimo? (ERP exige saber qtde de contratos e bancos. CRM exige corretores e CRECI).
+                - spin: O SDR fez perguntas investigativas em vez de fazer apenas um monólogo de vendas?
+                - dor: O SDR conseguiu identificar uma dor real ou problema na operação do cliente?
+                - gestao: O SDR mapeou se o lead é o decisor final ou envolveu a gestão?
+                - passos_ro: O SDR garantiu que o lead vai estar na frente de um COMPUTADOR na próxima reunião?
+                - produto: O SDR explicou de forma breve o valor do {produto_detectado}?
+                - gatilhos: O SDR utilizou gatilhos de urgência ou autoridade no agendamento?
 
                 REGRAS DE ERRO FATAL (Se violadas, marque "erro_fatal": true):
-                - {produto_detectado} ERP: Passar preço ou aceitar lead com 0 contratos. SLA exige quantidade de contratos + bancos.
-                - {produto_detectado} CRM: Passar preço ou aceitar lead sem CRECI. SLA exige número de corretores + CRECI.
-                - Ambos: Passos RO exige que o lead se comprometa a estar na frente do COMPUTADOR para a reunião com o especialista.
+                - {produto_detectado} ERP: Passar preço do sistema ou aceitar agendar com lead que tem 0 contratos.
+                - {produto_detectado} CRM: Passar preço do sistema ou aceitar agendar com lead sem CRECI.
 
-                Responda estritamente neste formato JSON:
+                Retorne OBRIGATORIAMENTE este formato JSON preenchendo o "r" APENAS com "Sim", "Não" ou "N/A":
                 {{
                   "erro_fatal": false,
                   "operacional": {{
-                    "escuta": {{"r": "Sim", "e": "Evidência"}},
-                    "validacao": {{"r": "Não", "e": "Evidência"}},
-                    "compreensao": {{"r": "Sim", "e": "Evidência"}},
-                    "objecoes": {{"r": "Sim", "e": "Evidência"}},
-                    "linguagem": {{"r": "Sim", "e": "Evidência"}},
-                    "receptividade": {{"r": "Sim", "e": "Evidência"}},
-                    "rapport": {{"r": "Sim", "e": "Evidência"}},
-                    "discurso": {{"r": "Sim", "e": "Evidência"}},
-                    "compreensao_cliente": {{"r": "Sim", "e": "Evidência"}},
-                    "clareza": {{"r": "Sim", "e": "Evidência"}},
-                    "sla": {{"r": "Não", "e": "Evidência"}},
-                    "spin": {{"r": "Sim", "e": "Evidência"}},
-                    "dor": {{"r": "Sim", "e": "Evidência"}},
-                    "gestao": {{"r": "Sim", "e": "Evidência"}},
-                    "passos_ro": {{"r": "Não", "e": "Evidência"}},
-                    "produto": {{"r": "Sim", "e": "Evidência"}},
-                    "gatilhos": {{"r": "Sim", "e": "Evidência"}}
+                    "escuta": {{"r": "[Sim/Não/N/A]", "e": "Extraia a frase da transcrição que prova isso"}},
+                    "validacao": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "compreensao": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "objecoes": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "linguagem": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "receptividade": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "rapport": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "discurso": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "compreensao_cliente": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "clareza": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "sla": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "spin": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "dor": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "gestao": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "passos_ro": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "produto": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}},
+                    "gatilhos": {{"r": "[Sim/Não/N/A]", "e": "Evidência"}}
                   }}
                 }}
                 """
