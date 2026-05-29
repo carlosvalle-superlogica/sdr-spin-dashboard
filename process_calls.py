@@ -43,7 +43,7 @@ def clean_json_response(text):
     return text.strip()
 
 # ==========================================
-# 3. NÚCLEO DE PROCESSAMENTO BLINDADO
+# 3. NÚCLEO DE PROCESSAMENTO CORRIGIDO
 # ==========================================
 def process_all_calls():
     if not os.path.exists(CSV_FILE):
@@ -62,14 +62,18 @@ def process_all_calls():
             print("Aviso: O arquivo JSON estava vazio ou inválido. Iniciando um novo.")
             db = {}
 
+    # Abrimos o arquivo para detecção de delimitador e fechamos imediatamente
     with open(CSV_FILE, mode='r', encoding='utf-8-sig') as f:
-        # DETECÇÃO AUTOMÁTICA DE DELIMITADOR (VÍRGULA OU PONTO E VÍRGULA)
         sample = f.read(2048)
         delimiter = ';' if ';' in sample else ','
-        f.seek(0)
-        
+    
+    # Reabrimos o arquivo de forma limpa para o DictReader não perder o cabeçalho
+    with open(CSV_FILE, mode='r', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f, delimiter=delimiter)
         linhas_processadas = 0
+        
+        print(f"Layout detectado. Separador utilizado: '{delimiter}'")
+        print(f"Campos encontrados na planilha: {reader.fieldnames}")
         
         for row in reader:
             call_id = row.get("ID do objeto")
@@ -80,6 +84,7 @@ def process_all_calls():
             duration = row.get("Duração da chamada (HH:mm:ss)") or "00:00"
             title = row.get("Título da chamada") or "Chamada de Vendas"
 
+            # Filtros rígidos de validação de linha
             if not call_id or not audio_url or not audio_url.startswith("http"):
                 continue
             
@@ -87,9 +92,10 @@ def process_all_calls():
                 continue
 
             if call_id in db:
+                print(f"-> [CACHE] Ignorando ID {call_id} (Já processado anteriormente)")
                 continue
 
-            print(f"-> [NOVA] Analisando ID {call_id} | SDR: {sdr_name}...")
+            print(f"-> [NOVA LIGAÇÃO] Iniciando ID {call_id} | SDR: {sdr_name}...")
             
             try:
                 req = urllib.request.Request(
@@ -107,7 +113,7 @@ def process_all_calls():
                 texto_ligacao = transcription.text
 
                 if len(texto_ligacao.strip()) < 10:
-                    print(f"Aviso: Áudio {call_id} sem fala detectada. Ignorando.")
+                    print(f"Aviso: Áudio {call_id} sem fala detectada ou mudo. Ignorando.")
                     continue
 
                 prompt_sistema = (
@@ -150,10 +156,11 @@ def process_all_calls():
                 
                 linhas_processadas += 1
                 
+                # Escrita imediata e forçada no disco
                 with open(CONSOLIDATED_FILE, 'w', encoding='utf-8') as sf:
                     json.dump(db, sf, ensure_ascii=False, indent=4)
 
-                print(f"✅ Chamada {call_id} analisada (Nota: {nota})")
+                print(f"✅ Sucesso: Chamada {call_id} salva no JSON (Nota: {nota})")
                 time.sleep(3)
 
             except json.JSONDecodeError:
@@ -168,7 +175,7 @@ def process_all_calls():
                 time.sleep(3)
                 continue
 
-    print(f"\n✅ SUCESSO: {linhas_processadas} chamadas consolidadas com segurança!")
+    print(f"\n✅ EXECUÇÃO FINALIZADA: {linhas_processadas} novas chamadas gravadas com sucesso no arquivo!")
 
 if __name__ == "__main__":
     try:
