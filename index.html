@@ -105,26 +105,26 @@
                     <h2 id="media-wps" class="text-4xl font-black text-emerald-400 mt-2">0.0 <span class="text-sm font-medium text-gray-500">pal/s</span></h2>
                     <i class="fa-solid fa-stopwatch absolute right-4 bottom-4 text-3xl text-gray-800/50"></i>
                 </div>
-                <div class="card-dark p-6 rounded-xl shadow-lg bg-rose-950/10 border border-rose-900/30 relative overflow-hidden">
-                    <span class="text-[10px] uppercase text-rose-400 font-bold tracking-wider block flex items-center gap-1.5">
-                        <i class="fa-solid fa-triangle-exclamation"></i> Alertas de Urgência
+                <div class="card-dark p-6 rounded-xl shadow-lg bg-amber-950/10 border border-amber-900/30 relative overflow-hidden">
+                    <span class="text-[10px] uppercase text-amber-400 font-bold tracking-wider block flex items-center gap-1.5">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Chamadas para Ajuste
                     </span>
-                    <h2 id="casos-criticos" class="text-4xl font-black text-rose-500 mt-2">0</h2>
-                    <i class="fa-solid fa-fire absolute right-4 bottom-4 text-3xl text-rose-900/20"></i>
+                    <h2 id="casos-criticos" class="text-4xl font-black text-amber-500 mt-2">0</h2>
+                    <i class="fa-solid fa-sliders absolute right-4 bottom-4 text-3xl text-amber-900/20"></i>
                 </div>
             </div>
 
             <div class="card-dark p-6 rounded-xl mt-6 shadow-lg border border-gray-800">
                 <div class="flex justify-between items-center mb-5 border-b border-gray-800 pb-3">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-fire text-rose-500"></i> Alertas de Desempenho Crítico
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500"></i> Central de Ajustes e Feedback
                     </h3>
-                    <span class="text-xs text-gray-400 font-medium bg-gray-900 px-3 py-1 rounded-full border border-gray-800">Contatos que necessitam de feedback imediato</span>
+                    <span class="text-xs text-gray-400 font-medium bg-gray-900 px-3 py-1 rounded-full border border-gray-800">Contatos que necessitam de calibração de roteiro</span>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="border-b border-gray-800 text-gray-500 text-[10px] font-bold uppercase tracking-widest">
+                            <tr class="border-b border-gray-800 weeds-gray-500 text-[10px] font-bold uppercase tracking-widest">
                                 <th class="pb-3">SDR Responsável</th>
                                 <th class="pb-3">Data</th>
                                 <th class="pb-3 text-center">Produto</th>
@@ -261,7 +261,7 @@
             </div>
             <div class="card-dark p-6 rounded-xl shadow-md border-t-4 border-emerald-500">
                 <h3 class="text-lg font-black text-emerald-400 border-b border-gray-800 pb-3 mb-4 flex items-center gap-2"><i class="fa-solid fa-circle-check"></i> N - Necessidade de Solução</h3>
-                <p class="text-gray-400 text-xs leading-relaxed mb-4">Focam no valor, utilidade e nos benefícios práticos da resolução do problema. Fazem o próprio lead declarar a importância do seu produto.</p>
+                <p class="text-gray-400 text-xs leading-relaxed mb-4">Focando no valor, utilidade e nos benefícios práticos da resolução do problema. Fazem o próprio lead declarar a importância do seu produto.</p>
                 <div class="bg-gray-900 border border-gray-800 p-4 rounded-lg text-xs space-y-3 text-gray-300 font-mono">
                     <div class="flex gap-2"><span class="text-emerald-400">👉</span> "Se conseguíssemos reduzir esse tempo pela metade, o que mudaria na rotina?"</div>
                     <div class="flex gap-2"><span class="text-emerald-400">👉</span> "Por que automatizar esse fluxo seria importante para a empresa hoje?"</div>
@@ -425,16 +425,28 @@
 
             tbCriticos.innerHTML = '';
             if(listaCriticos.length === 0) {
-                tbCriticos.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-emerald-500/80 font-medium">Nenhum alerta crítico no período! Excelente!</td></tr>`;
+                tbCriticos.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-emerald-500/80 font-medium">Nenhum ponto de atenção detectado! Todos operando no padrão estável.</td></tr>`;
             } else {
                 listaCriticos.forEach(c => {
-                    let motivo = c.nota_op === 0 ? "Erro Fatal na Regra" : (c.nota_spin <= 5.0 ? "SPIN Crítico" : "Baixa Conformidade");
+                    let motivo = "";
+                    let nOp = parseFloat(c.nota_op) || 0;
+                    let nSpin = parseFloat(c.nota_spin) || 0;
+
+                    // Mecanismo de Cascata Estrita por Cores e Emojis Sólidos
+                    if (nOp <= 5.0) {
+                        motivo = '<span class="flex items-center gap-1.5 font-bold text-rose-400">🔴 Ajuste Conformidade</span>';
+                    } else if (nSpin <= 5.0) {
+                        motivo = '<span class="flex items-center gap-1.5 font-bold text-amber-400">🟡 Ajuste SPIN</span>';
+                    } else {
+                        motivo = '<span class="flex items-center gap-1.5 font-bold text-emerald-400">🟢 Desempenho Estável</span>';
+                    }
+
                     tbCriticos.innerHTML += `
                         <tr class="hover:bg-gray-800/40 transition">
-                            <td class="py-4 font-bold text-white flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-rose-500"></span> ${c.sdr}</td>
+                            <td class="py-4 font-bold text-white flex items-center gap-2">${c.sdr}</td>
                             <td class="py-4 text-gray-400">${c.data}</td>
                             <td class="py-4 text-center"><span class="bg-gray-800 px-2 py-1 rounded text-[10px] uppercase font-bold text-gray-300">${c.produto}</span></td>
-                            <td class="py-4 text-rose-400 font-semibold">${motivo}</td>
+                            <td class="py-4">${motivo}</td>
                             <td class="py-4 text-right pr-2"><button onclick="abrirDossie('${c.id}')" class="text-indigo-400 font-bold hover:text-white transition bg-indigo-900/20 px-3 py-1.5 rounded-lg border border-indigo-500/20 hover:bg-indigo-600">Revisar</button></td>
                         </tr>`;
                 });
@@ -491,10 +503,19 @@
             let htmlStr = '';
             dados.sort((a,b)=>b.id - a.id).forEach(c => {
                 const wColor = (c.wps||0) < 1.5 || (c.wps||0) > 2.5 ? 'text-amber-400' : 'text-emerald-400';
+                
+                // Mapeamento dinâmico do marcador na listagem geral para combinar com a Central de Ajustes
+                let dotStatus = '🟢';
+                if ((parseFloat(c.nota_op) || 0) <= 5.0) {
+                    dotStatus = '🔴';
+                } else if ((parseFloat(c.nota_spin) || 0) <= 5.0) {
+                    dotStatus = '🟡';
+                }
+
                 htmlStr += `
                 <tr class="border-b border-gray-800/50 hover:bg-gray-800/30 transition text-xs">
                     <td class="py-3.5 pl-2 text-gray-400 font-mono">${c.data}</td>
-                    <td class="py-3.5 font-bold text-white flex items-center gap-2">${c.urgencia==="SIM"?'<i class="fa-solid fa-fire text-rose-500" title="Alerta"></i>':''}${c.sdr}</td>
+                    <td class="py-3.5 font-bold text-white flex items-center gap-1.5"><span class="text-sm select-none">${dotStatus}</span>${c.sdr}</td>
                     <td class="py-3.5 text-center"><span class="bg-gray-800 px-2 py-0.5 rounded border border-gray-700 text-gray-300 font-semibold">${c.produto}</span></td>
                     <td class="py-3.5 text-center font-mono font-bold ${wColor}">${parseFloat(c.wps||0).toFixed(2)}</td>
                     <td class="py-3.5 text-center"><span class="px-2 py-0.5 rounded bg-indigo-950/30 text-indigo-400 border border-indigo-900/50 font-bold">${parseFloat(c.nota_spin||0).toFixed(1)}</span></td>
@@ -513,11 +534,11 @@
             return '<span class="badge-na px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider">N/A</span>';
         }
 
-        // FORMATADOR: Limpa a poluição dos ### do ChatGPT e os transforma em títulos esteticamente elegantes no HTML e PDF.
+        // FORMATADOR: Transforma cabeçalhos Markdown em blocos estáticos limpos e elegantes
         function formatMarkdown(text) {
             if (!text) return '';
             return text.replace(/###\s([^\n]+)/g, '<br><span class="block mt-2 mb-2 text-indigo-400 font-black uppercase tracking-widest border-b border-gray-800 pb-1">$1</span>')
-                       .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
+                       .replace(/\*\/(.*?)\*\//g, '<strong class="text-white">$1</strong>');
         }
 
         function fecharModal() { document.getElementById('modal-sdr').classList.add('hidden'); }
@@ -604,24 +625,20 @@
             document.getElementById('modal-sdr').classList.remove('hidden');
         }
 
-        // MOTOR DO PDF BLINDADO: Renderização fixa em 1280px a partir da coordenada 0,0
         function exportarDossiePDF() {
             const btn = document.getElementById('btn-gerar-pdf');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Gerando...';
 
-            // 1. Clona a estrutura
             const original = document.getElementById('printable-dossier');
             const element = original.cloneNode(true);
 
-            // 2. Remove amarras CSS do navegador para garantir que o Canvas "pinte" tudo
             element.classList.remove('h-[95vh]', 'max-w-full');
             element.style.height = 'auto';
-            element.style.width = '1280px'; // Força HD Largo idêntico ao Desktop
+            element.style.width = '1280px'; 
             element.style.position = 'relative';
-            element.style.backgroundColor = '#0b0f19'; // Mantém o fundo escuro consistente
+            element.style.backgroundColor = '#0b0f19'; 
             
-            // 3. Destrava as barras de rolagem para o conteúdo descer até ao fim
             const scrolls = element.querySelectorAll('.overflow-y-auto, .overflow-hidden, .custom-scrollbar, .h-56');
             scrolls.forEach(el => {
                 el.classList.remove('overflow-y-auto', 'overflow-hidden', 'custom-scrollbar', 'h-56');
@@ -629,20 +646,17 @@
                 el.style.height = 'auto';
             });
 
-            // 4. Ativa o Anti-Guilhotina: não quebra caixas de notas ao meio
             const avoidBreaks = element.querySelectorAll('.bg-gray-900\\/50, .pdf-no-break');
             avoidBreaks.forEach(el => {
                 el.style.pageBreakInside = 'avoid';
                 el.style.breakInside = 'avoid';
             });
 
-            // 5. Oculta botões de tela
             const linksContainer = element.querySelector('#modal-links');
             if(linksContainer) linksContainer.style.display = 'none';
             const closeBtn = element.querySelector('#btn-close-modal');
             if(closeBtn) closeBtn.style.display = 'none';
 
-            // 6. SOLUÇÃO DO CORTE ESQUERDO: Posição invisível absoluta presa no (0,0) do eixo X e Y
             const wrapper = document.createElement('div');
             wrapper.style.position = 'absolute';
             wrapper.style.top = '0px';
@@ -654,7 +668,6 @@
 
             const sdrName = document.getElementById('modal-title').innerText.replace('Auditoria: ', '');
 
-            // 7. Renderização em formato PAISAGEM (Landscape) com escala exata do clone
             const opt = {
                 margin:       [10, 10, 10, 10],
                 filename:     `Auditoria_SDR_${sdrName.replace(/\s+/g, '_')}.pdf`,
@@ -670,7 +683,6 @@
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
             };
 
-            // 8. Baixa e limpa o clone "fantasma" do fundo da tela
             html2pdf().set(opt).from(element).save().then(() => {
                 document.body.removeChild(wrapper);
                 btn.innerHTML = originalText;
