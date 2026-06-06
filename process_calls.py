@@ -12,6 +12,7 @@ from groq import Groq
 # 1. CONFIGURAÇÕES E VARIÁVEIS DE AMBIENTE
 # ==========================================
 GROQ_KEY = os.environ.get("GROQ_API_KEY")
+
 if not GROQ_KEY:
     raise ValueError("ERRO CRÍTICO: GROQ_API_KEY não encontrada nos Secrets!")
 
@@ -30,6 +31,7 @@ MODELO_PARERES = "llama-3.3-70b-versatile"
 def clean_json(text):
     """Garante a limpeza e extração apenas do objeto JSON retornado pelas APIs de LLM."""
     text = text.strip()
+    
     if text.startswith("```json"): 
         text = text[7:]
     elif text.startswith("```"): 
@@ -39,11 +41,12 @@ def clean_json(text):
         text = text[:-3]
     
     text = text.strip()
+    
     try:
         match = re.search(r'\{.*\}', text, re.DOTALL)
         if match: 
             return match.group(0)
-    except: 
+    except Exception: 
         pass
     
     return text
@@ -51,7 +54,7 @@ def clean_json(text):
 def safe_float(val, default=0.0):
     try: 
         return float(val)
-    except: 
+    except Exception: 
         return default
 
 def calcular_segundos(duracao_str):
@@ -62,69 +65,64 @@ def calcular_segundos(duracao_str):
             return int(partes[0]) * 3600 + int(partes[1]) * 60 + int(partes[2])
         if len(partes) == 2: 
             return int(partes[0]) * 60 + int(partes[1])
-    except: 
+    except Exception: 
         pass
+    
     return 1
 
 def calcular_nota_operacional(op_data, erro_fatal):
     """
-    MATEMÁTICA ADITIVA (CONSTRUÇÃO DO 10.0):
-    O SDR começa com 0.0 e ganha pontos por cada acerto, dependendo do Tier.
-    O "Não" aplica penalidades proporcionais à gravidade.
-    Os "N/A Isentos" concedem o ponto total (reconhecimento de inteligência de escuta).
-    A nota final é travada estritamente entre 0.0 e 10.0.
+    MATEMÁTICA ADITIVA RÍGIDA (A BUSCA PELO 10.0):
+    O SDR começa com 0.0. Para tirar 10.0, precisa de 17 "Sim".
+    Qualquer "N/A" soma 0.0 (logo, o 10.0 já é impossível).
+    Qualquer "Não" aplica penalidade de acordo com a gravidade do erro.
     """
     nota = 0.0
 
-    # Chaves e Tiers
-    chaves_criticas = ['sla', 'passos_ro', 'gestao']  # 3 itens (1.0 cada = 3.0 max)
-    chaves_estrategicas = ['spin', 'dor', 'validacao', 'objecoes', 'produto', 'escuta', 'compreensao'] # 7 itens (0.7 cada = 4.9 max)
-    chaves_formais = ['linguagem', 'receptividade', 'rapport', 'discurso', 'compreensao_cliente', 'clareza', 'gatilhos'] # 7 itens (0.3 cada = 2.1 max)
+    chaves_criticas = ['sla', 'passos_ro', 'gestao']  
+    # 3 itens (1.0 cada = 3.0 max)
+    
+    chaves_estrategicas = ['spin', 'dor', 'validacao', 'objecoes', 'produto', 'escuta', 'compreensao'] 
+    # 7 itens (0.7 cada = 4.9 max)
+    
+    chaves_formais = ['linguagem', 'receptividade', 'rapport', 'discurso', 'compreensao_cliente', 'clareza', 'gatilhos'] 
+    # 7 itens (0.3 cada = 2.1 max)
 
-    # N/A Isentos: Critérios onde o lead pode ter adiantado a conversa ou onde não houve gatilho (ex: objeções).
-    na_isentos = ['objecoes', 'validacao', 'compreensao', 'dor', 'sla']
-
-    # --- TIER 1: CRÍTICOS (Ganha 1.0 | Punição Não: -1.0) ---
+    # --- TIER 1: CRÍTICOS ---
     for k in chaves_criticas:
         r = op_data.get(k, {}).get('r')
-        if r == 'Sim':
+        if r == 'Sim': 
             nota += 1.0
-        elif r == 'N/A' and k in na_isentos:
-            nota += 1.0 # O lead falou sozinho, SDR ganha o ponto
-        elif r == 'Não':
-            nota -= 1.0 # Penalidade pesada por quebrar o processo
+        elif r == 'Não': 
+            nota -= 1.0 # Penalidade grave
 
-    # --- TIER 2: ESTRATÉGICOS (Ganha 0.7 | Punição Não: -0.5) ---
+    # --- TIER 2: ESTRATÉGICOS ---
     for k in chaves_estrategicas:
         r = op_data.get(k, {}).get('r')
-        if r == 'Sim':
+        if r == 'Sim': 
             nota += 0.7
-        elif r == 'N/A' and k in na_isentos:
-            nota += 0.7 # Isenção técnica, SDR ganha o ponto
-        elif r == 'Não':
-            nota -= 0.5 # Penalidade média por falha tática
+        elif r == 'Não': 
+            nota -= 0.5 # Penalidade média
 
-    # --- TIER 3: FORMAIS (Ganha 0.3 | Punição Não: -0.2) ---
+    # --- TIER 3: FORMAIS ---
     for k in chaves_formais:
         r = op_data.get(k, {}).get('r')
-        if r == 'Sim':
+        if r == 'Sim': 
             nota += 0.3
-        elif r == 'N/A' and k in na_isentos:
-            nota += 0.3
-        elif r == 'Não':
-            nota -= 0.2 # Penalidade leve por etiqueta/postura
+        elif r == 'Não': 
+            nota -= 0.2 # Penalidade leve
 
     # --- ERRO FATAL ---
-    # Aplica um corte massivo na nota final se o sigilo ou regra de produto foi quebrada.
     if erro_fatal:
         nota -= 4.0
 
-    # CLAMPEAMENTO SEGURO: Impede que a nota fique negativa ou passe de 10.0
+    # CLAMPEAMENTO SEGURO
     return min(max(nota, 0.0), 10.0)
 
 def executar_chat_com_retentativa(model, messages, response_format, max_retries=5):
     """Executa chamadas à API do Groq controlando de forma inteligente erros de Rate Limit (429)."""
     base_delay = 5  
+    
     for attempt in range(max_retries):
         try:
             chat = client.chat.completions.create(
@@ -134,35 +132,42 @@ def executar_chat_com_retentativa(model, messages, response_format, max_retries=
                 temperature=0.1
             )
             return chat
+            
         except Exception as e:
             err_msg = str(e)
+            
             if "429" in err_msg or "rate_limit" in err_msg.lower():
                 match = re.search(r"try again in ([0-9.]+)(s|ms)", err_msg)
                 wait_time = float(match.group(1)) if match else (base_delay ** (attempt + 1))
+                
                 if match and match.group(2) == "ms": 
                     wait_time = wait_time / 1000.0
                 
                 wait_time = max(wait_time + 1.0, 3.0) 
                 print(f"   ⚠️ [RATE LIMIT] Limite atingido. Aguardando {wait_time}s antes da tentativa {attempt + 1}/{max_retries}...")
                 time.sleep(wait_time)
+                
             else:
                 raise e
+                
     raise RuntimeError("Erro: Falha persistente por excesso de requisições no Groq (Rate Limit).")
 
 # ==========================================
 # 3. PIPELINE DE EXECUÇÃO MULTIAGENTE
 # ==========================================
 def process_all_calls():
+    
     if not os.path.exists(CSV_FILE):
         print(f"Erro: Ficheiro {CSV_FILE} não encontrado.")
         return
         
     db = {}
+    
     if os.path.exists(CONSOLIDATED_FILE):
         try:
             with open(CONSOLIDATED_FILE, 'r', encoding='utf-8') as f: 
                 db = json.load(f)
-        except: 
+        except Exception: 
             db = {}
 
     with open(CSV_FILE, mode='r', encoding='utf-8-sig') as f:
@@ -219,7 +224,9 @@ def process_all_calls():
                     model="whisper-large-v3", 
                     response_format="json"
                 )
+                
                 texto = transcription.text
+                
                 if len(texto) < 10: 
                     print("Chamada ignorada: Áudio sem conteúdo legível ou muito curto.")
                     continue
@@ -366,6 +373,7 @@ def process_all_calls():
                   "plano_de_acao_curto": "Ação exata sem usar aspas duplas no meio do texto."
                 }}
                 """
+                
                 chat3 = executar_chat_com_retentativa(
                     model=MODELO_PARERES, 
                     messages=[
@@ -386,11 +394,21 @@ def process_all_calls():
                 urgencia = "SIM" if (nota_op <= 5.0 or nota_spin <= 5.0) else "NÃO"
 
                 db[call_id] = {
-                    "id": call_id, "sdr": sdr_name, "produto": produto_detectado, "data": date_str, "duracao": duration,
-                    "wps": wps, "nota_spin": round(nota_spin, 1), "nota_op": round(nota_op, 1),
-                    "urgencia": urgencia, "deal_url": deal_url, "audio_url": audio_url,
-                    "notas_s_p_i_n": s_spin, "formulario": res1.get("operacional", {}),
-                    "parecer": res3.get("parecer_executivo", ""), "sugestoes": res3.get("plano_de_acao_curto", ""),
+                    "id": call_id, 
+                    "sdr": sdr_name, 
+                    "produto": produto_detectado, 
+                    "data": date_str, 
+                    "duracao": duration,
+                    "wps": wps, 
+                    "nota_spin": round(nota_spin, 1), 
+                    "nota_op": round(nota_op, 1),
+                    "urgencia": urgencia, 
+                    "deal_url": deal_url, 
+                    "audio_url": audio_url,
+                    "notas_s_p_i_n": s_spin, 
+                    "formulario": res1.get("operacional", {}),
+                    "parecer": res3.get("parecer_executivo", ""), 
+                    "sugestoes": res3.get("plano_de_acao_curto", ""),
                     "transcricao": texto
                 }
                 
