@@ -68,42 +68,59 @@ def calcular_segundos(duracao_str):
 
 def calcular_nota_operacional(op_data, erro_fatal):
     """
-    MATEMÁTICA FLEXÍVEL E JUSTA DE AUDITORIA:
-    - Fim do Zero Absoluto: Erros fatais tiram muitos pontos (-4.0), mas não zeram toda a ligação caso o SDR tenha acertado outras coisas.
-    - Foco na Escuta Ativa (N/A): O 'N/A' não penaliza mais o SDR em habilidades estratégicas ou formais, pois significa que o lead entregou a resposta proativamente e o SDR não precisou perguntar.
+    MATEMÁTICA ADITIVA (CONSTRUÇÃO DO 10.0):
+    O SDR começa com 0.0 e ganha pontos por cada acerto, dependendo do Tier.
+    O "Não" aplica penalidades proporcionais à gravidade.
+    Os "N/A Isentos" concedem o ponto total (reconhecimento de inteligência de escuta).
+    A nota final é travada estritamente entre 0.0 e 10.0.
     """
-    nota_final = 10.0
+    nota = 0.0
 
-    if erro_fatal: 
-        nota_final -= 4.0  # Penalidade severa, mas permite que o SDR pontue nos acertos.
+    # Chaves e Tiers
+    chaves_criticas = ['sla', 'passos_ro', 'gestao']  # 3 itens (1.0 cada = 3.0 max)
+    chaves_estrategicas = ['spin', 'dor', 'validacao', 'objecoes', 'produto', 'escuta', 'compreensao'] # 7 itens (0.7 cada = 4.9 max)
+    chaves_formais = ['linguagem', 'receptividade', 'rapport', 'discurso', 'compreensao_cliente', 'clareza', 'gatilhos'] # 7 itens (0.3 cada = 2.1 max)
 
-    chaves_criticas = ['sla', 'passos_ro', 'gestao']
-    chaves_estrategicas = ['spin', 'dor', 'validacao', 'objecoes', 'produto', 'escuta', 'compreensao']
-    chaves_formais = ['linguagem', 'receptividade', 'rapport', 'discurso', 'compreensao_cliente', 'clareza', 'gatilhos']
+    # N/A Isentos: Critérios onde o lead pode ter adiantado a conversa ou onde não houve gatilho (ex: objeções).
+    na_isentos = ['objecoes', 'validacao', 'compreensao', 'dor', 'sla']
 
-    # CRÍTICOS: Quebra de processo (SLA, Agendamento) -> Punição Média-Alta
+    # --- TIER 1: CRÍTICOS (Ganha 1.0 | Punição Não: -1.0) ---
     for k in chaves_criticas:
         r = op_data.get(k, {}).get('r')
-        if r == 'Não': 
-            nota_final -= 1.5
-        elif r == 'N/A': 
-            nota_final -= 0.5  # Omissão de dados vitais ainda perde 0.5
+        if r == 'Sim':
+            nota += 1.0
+        elif r == 'N/A' and k in na_isentos:
+            nota += 1.0 # O lead falou sozinho, SDR ganha o ponto
+        elif r == 'Não':
+            nota -= 1.0 # Penalidade pesada por quebrar o processo
 
-    # ESTRATÉGICOS: Construção de valor -> Punição Média (N/A isento)
+    # --- TIER 2: ESTRATÉGICOS (Ganha 0.7 | Punição Não: -0.5) ---
     for k in chaves_estrategicas:
         r = op_data.get(k, {}).get('r')
-        if r == 'Não': 
-            nota_final -= 0.8
-        # N/A não tira pontos aqui (ex: Lead não teve objeções ou já validou o problema antes de forma clara)
+        if r == 'Sim':
+            nota += 0.7
+        elif r == 'N/A' and k in na_isentos:
+            nota += 0.7 # Isenção técnica, SDR ganha o ponto
+        elif r == 'Não':
+            nota -= 0.5 # Penalidade média por falha tática
 
-    # FORMAIS: Soft skills e Etiqueta -> Punição Leve (N/A isento)
+    # --- TIER 3: FORMAIS (Ganha 0.3 | Punição Não: -0.2) ---
     for k in chaves_formais:
         r = op_data.get(k, {}).get('r')
-        if r == 'Não': 
-            nota_final -= 0.4
-        # N/A não tira pontos aqui
+        if r == 'Sim':
+            nota += 0.3
+        elif r == 'N/A' and k in na_isentos:
+            nota += 0.3
+        elif r == 'Não':
+            nota -= 0.2 # Penalidade leve por etiqueta/postura
 
-    return min(max(nota_final, 0.0), 10.0)
+    # --- ERRO FATAL ---
+    # Aplica um corte massivo na nota final se o sigilo ou regra de produto foi quebrada.
+    if erro_fatal:
+        nota -= 4.0
+
+    # CLAMPEAMENTO SEGURO: Impede que a nota fique negativa ou passe de 10.0
+    return min(max(nota, 0.0), 10.0)
 
 def executar_chat_com_retentativa(model, messages, response_format, max_retries=5):
     """Executa chamadas à API do Groq controlando de forma inteligente erros de Rate Limit (429)."""
