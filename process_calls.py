@@ -119,9 +119,9 @@ def calcular_nota_operacional(op_data, erro_fatal):
     # CLAMPEAMENTO SEGURO
     return min(max(nota, 0.0), 10.0)
 
-def executar_chat_com_retentativa(model, messages, response_format, max_retries=3):
-    """Executa chamadas à API do Groq controlando de forma inteligente erros de Rate Limit (429). Retentativas reduzidas para evitar loop."""
-    base_delay = 3  
+def executar_chat_com_retentativa(model, messages, response_format, max_retries=6):
+    """Executa chamadas à API do Groq controlando de forma inteligente erros de Rate Limit (429)."""
+    base_delay = 10  
     
     for attempt in range(max_retries):
         try:
@@ -137,14 +137,19 @@ def executar_chat_com_retentativa(model, messages, response_format, max_retries=
             err_msg = str(e)
             
             if "429" in err_msg or "rate_limit" in err_msg.lower():
+                # Tenta extrair o tempo exato que a API pede para esperar
                 match = re.search(r"try again in ([0-9.]+)(s|ms)", err_msg)
-                wait_time = float(match.group(1)) if match else (base_delay ** (attempt + 1))
                 
-                if match and match.group(2) == "ms": 
-                    wait_time = wait_time / 1000.0
+                if match:
+                    wait_time = float(match.group(1))
+                    if match.group(2) == "ms": 
+                        wait_time = wait_time / 1000.0
+                else:
+                    # Se não achar o tempo exato, usa backoff progressivo seguro
+                    wait_time = base_delay * (attempt + 1)
                 
-                wait_time = max(wait_time + 1.0, 3.0) 
-                print(f"   ⚠️ [RATE LIMIT] Limite atingido. Aguardando {wait_time}s antes da tentativa {attempt + 1}/{max_retries}...")
+                wait_time += 2.0 # Margem de segurança de 2 segundos a mais
+                print(f"   ⚠️ [RATE LIMIT] Pausa obrigatória da API. Aguardando {wait_time:.1f}s (Tentativa {attempt + 1}/{max_retries})...")
                 time.sleep(wait_time)
                 
             else:
@@ -416,12 +421,15 @@ def process_all_calls():
                     json.dump(db, sf, ensure_ascii=False, indent=4)
                 
                 print(f"✅ Auditoria Finalizada com Sucesso! SPIN: {nota_spin:.1f} | Conformidade: {nota_op:.1f}")
-                time.sleep(2)
+                
+                # Respiro longo de 15 segundos para zera o Rate Limit da Groq antes da próxima chamada.
+                time.sleep(15)
 
             except Exception as e:
                 print(f"❌ Erro na auditoria do ID {call_id}: {e}")
                 traceback.print_exc()
-                time.sleep(2)
+                # Em caso de erro, também dá um fôlego para a API não bloquear a próxima tentativa
+                time.sleep(10)
 
 if __name__ == "__main__":
     process_all_calls()
