@@ -121,7 +121,7 @@ def calcular_nota_operacional(op_data, erro_fatal):
 
 def executar_chat_com_retentativa(model, messages, response_format, max_retries=6):
     """Executa chamadas à API do Groq controlando de forma inteligente erros de Rate Limit (429)."""
-    base_delay = 10  
+    base_delay = 15  
     
     for attempt in range(max_retries):
         try:
@@ -134,10 +134,10 @@ def executar_chat_com_retentativa(model, messages, response_format, max_retries=
             return chat
             
         except Exception as e:
-            err_msg = str(e)
+            err_msg = str(e).lower()
             
-            if "429" in err_msg or "rate_limit" in err_msg.lower():
-                # Tenta extrair o tempo exato que a API pede para esperar
+            # Captura qualquer erro de limite de requisição ou 429
+            if "429" in err_msg or "rate" in err_msg or "too many" in err_msg:
                 match = re.search(r"try again in ([0-9.]+)(s|ms)", err_msg)
                 
                 if match:
@@ -145,17 +145,16 @@ def executar_chat_com_retentativa(model, messages, response_format, max_retries=
                     if match.group(2) == "ms": 
                         wait_time = wait_time / 1000.0
                 else:
-                    # Se não achar o tempo exato, usa backoff progressivo seguro
                     wait_time = base_delay * (attempt + 1)
                 
-                wait_time += 2.0 # Margem de segurança de 2 segundos a mais
-                print(f"   ⚠️ [RATE LIMIT] Pausa obrigatória da API. Aguardando {wait_time:.1f}s (Tentativa {attempt + 1}/{max_retries})...")
+                wait_time += 5.0 # Margem de segurança
+                print(f"   ⚠️ [RATE LIMIT] Limite da API atingido. Aguardando {wait_time:.1f}s (Tentativa {attempt + 1}/{max_retries})...")
                 time.sleep(wait_time)
                 
             else:
                 raise e
                 
-    raise RuntimeError("Erro: Falha persistente por excesso de requisições no Groq (Rate Limit).")
+    raise RuntimeError(f"Erro: Falha persistente na API da Groq após {max_retries} tentativas.")
 
 # ==========================================
 # 3. PIPELINE DE EXECUÇÃO MULTIAGENTE
@@ -207,7 +206,7 @@ def process_all_calls():
             txt_verif = (title + " " + json.dumps(row)).lower()
             produto_detectado = "CRM" if any(p in txt_verif for p in ["crm", "creci", "corretor"]) else "ERP"
 
-            # Trava de Segurança Isolada para Download de Áudio (Timeout reduzido para 10s)
+            # Trava de Segurança Isolada para Download de Áudio (Timeout de 10s)
             try:
                 req = urllib.request.Request(audio_url, headers={'User-Agent': 'Mozilla/5.0'})
                 with urllib.request.urlopen(req, timeout=10) as response: 
@@ -338,7 +337,10 @@ def process_all_calls():
                     response_format={"type": "json_object"}
                 )
                 res2 = json.loads(clean_json(chat2.choices[0].message.content))
-                time.sleep(2)
+                
+                # 🚨 RESPIRO ABSOLUTO DE 35 SEGUNDOS PARA ZERAR O RATE LIMIT 🚨
+                print("   ⏳ Dando fôlego estratégico (35s) para a cota da IA limpar antes do modelo pesado...")
+                time.sleep(35)
 
                 # --------------------------------------------------
                 # AGENTE 3: FEEDBACK TÁTICO, DIRETO E SEM DESCULPAS GENÉRICAS
@@ -422,14 +424,14 @@ def process_all_calls():
                 
                 print(f"✅ Auditoria Finalizada com Sucesso! SPIN: {nota_spin:.1f} | Conformidade: {nota_op:.1f}")
                 
-                # Respiro longo de 15 segundos para zera o Rate Limit da Groq antes da próxima chamada.
-                time.sleep(15)
+                # Zera o fluxo final com mais uma pequena folga antes da próxima linha do CSV
+                time.sleep(10)
 
             except Exception as e:
                 print(f"❌ Erro na auditoria do ID {call_id}: {e}")
                 traceback.print_exc()
-                # Em caso de erro, também dá um fôlego para a API não bloquear a próxima tentativa
-                time.sleep(10)
+                # Em caso de erro pesado, o robô dorme e recupera as forças
+                time.sleep(30)
 
 if __name__ == "__main__":
     process_all_calls()
