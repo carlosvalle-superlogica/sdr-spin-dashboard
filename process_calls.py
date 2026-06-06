@@ -119,9 +119,9 @@ def calcular_nota_operacional(op_data, erro_fatal):
     # CLAMPEAMENTO SEGURO
     return min(max(nota, 0.0), 10.0)
 
-def executar_chat_com_retentativa(model, messages, response_format, max_retries=5):
-    """Executa chamadas à API do Groq controlando de forma inteligente erros de Rate Limit (429)."""
-    base_delay = 5  
+def executar_chat_com_retentativa(model, messages, response_format, max_retries=3):
+    """Executa chamadas à API do Groq controlando de forma inteligente erros de Rate Limit (429). Retentativas reduzidas para evitar loop."""
+    base_delay = 3  
     
     for attempt in range(max_retries):
         try:
@@ -202,20 +202,20 @@ def process_all_calls():
             txt_verif = (title + " " + json.dumps(row)).lower()
             produto_detectado = "CRM" if any(p in txt_verif for p in ["crm", "creci", "corretor"]) else "ERP"
 
-            # Trava de Segurança Isolada para Download de Áudio (Timeout de 15 segundos)
+            # Trava de Segurança Isolada para Download de Áudio (Timeout reduzido para 10s)
             try:
                 req = urllib.request.Request(audio_url, headers={'User-Agent': 'Mozilla/5.0'})
-                with urllib.request.urlopen(req, timeout=15) as response: 
+                with urllib.request.urlopen(req, timeout=10) as response: 
                     audio_bytes = response.read()
             except Exception as e:
                 print(f"   ⚠️ [TIMEOUT/ERRO DOWNLOAD] Servidor de áudio falhou ou demorou muito: {e}. Pulando...")
                 continue
 
             try:
-                # Prevenção Ativa Contra Erro 413: Mede o tamanho em MB antes de enviar para a API
+                # Prevenção Ativa Contra Loop de Arquivos Enormes na Groq: Tolerância máxima de 20MB.
                 tamanho_mb = len(audio_bytes) / (1024 * 1024)
-                if tamanho_mb > 25.0:
-                    print(f"   ⚠️ [PULANDO CHAMADA] O arquivo possui {tamanho_mb:.2f} MB excedendo o teto de 25MB da API.")
+                if tamanho_mb > 20.0:
+                    print(f"   ⚠️ [PULANDO CHAMADA] O arquivo possui {tamanho_mb:.2f} MB excedendo o teto seguro de 20MB da API.")
                     continue
 
                 # Transcrição com Whisper-Large-V3
@@ -242,17 +242,17 @@ def process_all_calls():
                 Você é o Agente 1: Auditor Comercial Inteligente. Avalie o SDR no produto {produto_detectado}.
                 
                 MUITO IMPORTANTE - USO ESTRATÉGICO DO N/A (FLEXIBILIDADE E ESCUTA ATIVA):
-                Se uma pergunta do processo de venda não precisou ser feita porque o Lead JÁ FORNECEU a informação de forma proativa na conversa (ex: o lead já disse espontaneamente qual era o problema ou quantos contratos ele tem), marque OBRIGATORIAMENTE "N/A" na validação ou compreensão. NUNCA marque "Não" se o SDR teve a inteligência de ouvir o lead atentamente e não repetir perguntas desnecessárias.
+                Se uma pergunta do processo de venda não precisou ser feita porque o Lead JÁ FORNECEU a informação de forma proativa na conversa (ex: o lead já disse espontaneamente qual era o problema ou quantos contratos ele tem), marque OBRIGATORIAMENTE 'N/A' na validação ou compreensão. NUNCA marque 'Não' se o SDR teve a inteligência de ouvir o lead atentamente e não repetir perguntas desnecessárias.
 
                 DIRETRIZES DE AUDITORIA:
                 [1. ESCUTA E ADAPTAÇÃO]
-                - escuta: O SDR adaptou a conversa? Se interrompeu o lead ou ignorou uma dor para ler o script passivamente, marque "Não".
-                - validacao: Marque "N/A" se o lead foi tão claro que a validação não foi necessária. Marque "Não" se o SDR mudou de assunto secamente após o lead confessar um problema grave.
-                - compreensao: Inteligência de fluxo. Marque "Não" APENAS se o SDR perguntou de novo algo que o lead já tinha respondido antes, demonstrando desatenção.
-                - objecoes: Contornou barreiras? Se o lead não apresentou nenhuma objeção durante a call, marque OBRIGATORIAMENTE "N/A".
+                - escuta: O SDR adaptou a conversa? Se interrompeu o lead ou ignorou uma dor para ler o script passivamente, marque 'Não'.
+                - validacao: Marque 'N/A' se o lead foi tão claro que a validação não foi necessária. Marque 'Não' se o SDR mudou de assunto secamente após o lead confessar um problema grave.
+                - compreensao: Inteligência de fluxo. Marque 'Não' APENAS se o SDR perguntou de novo algo que o lead já tinha respondido antes, demonstrando desatenção.
+                - objecoes: Contornou barreiras? Se o lead não apresentou nenhuma objeção durante a call, marque OBRIGATORIAMENTE 'N/A'.
 
                 [2. COMUNICAÇÃO E POSTURA B2B]
-                - linguagem: Norma culta. ATENÇÃO: Se o SDR usou diminutivos infantis e antiprofissionais (sisteminha, minutinho, propostinha, tempinho), marque "Não".
+                - linguagem: Norma culta. ATENÇÃO: Se o SDR usou diminutivos infantis e antiprofissionais (sisteminha, minutinho, propostinha, tempinho), marque 'Não'.
                 - receptividade: Executou a saudação completa de forma acolhedora?
                 - rapport: Aproveitou o contexto trazido pelo cliente para quebrar o gelo ou foi um robô?
                 - discurso: Usou vocabulário técnico correto do mercado imobiliário e soou como um especialista?
@@ -263,19 +263,19 @@ def process_all_calls():
                 - sla: 
                   * Para {produto_detectado} CRM: Coletou Número de Corretores E Situação do CRECI?
                   * Para {produto_detectado} ERP: Coletou Quantidade de Contratos E Bancos operados?
-                  (Se o lead já entregou a informação sozinho na fala dele sem precisar ser perguntado, marque "Sim" ou "N/A").
+                  (Se o lead já entregou a informação sozinho na fala dele sem precisar ser perguntado, marque 'Sim' ou 'N/A').
                 - spin: Seguiu a sequência exploratória de investigação ou só apresentou funcionalidades como um panfleto?
-                - dor: Encontrou um gargalo real? Se o lead deu respostas vazias e o SDR não insistiu para descobrir a verdade, marque "Não".
+                - dor: Encontrou um gargalo real? Se o lead deu respostas vazias e o SDR não insistiu para descobrir a verdade, marque 'Não'.
                 - gestao: Mapeou e descobriu quem toma a decisão final?
-                - passos_ro: Conseguiu a confirmação VERBAL CLARA de que o lead estará num COMPUTADOR na próxima reunião? Se o SDR aceitou um "vou ver pelo celular" ou "estarei no carro", marque "Não".
+                - passos_ro: Conseguiu a confirmação VERBAL CLARA de que o lead estará num COMPUTADOR na próxima reunião? Se o SDR aceitou um "vou ver pelo celular" ou "estarei no carro", marque 'Não'.
                 - produto: Conectou a solução tecnológica à dor do cliente de forma inteligente?
                 - gatilhos: Gerou valor e urgência de agenda para o próximo agendamento?
 
                 REGRAS DE ERRO FATAL E JSON: 
-                - Marque "erro_fatal": true APENAS se o SDR quebrar o sigilo e passar preço ou agendar reunião com lead fora de perfil.
-                - 🚨 NUNCA use aspas duplas (") dentro das suas frases de "Evidência". Use sempre aspas simples (').
+                - Marque 'erro_fatal': true APENAS se o SDR quebrar o sigilo e passar preço ou agendar reunião com lead fora de perfil.
+                - 🚨 NUNCA use aspas duplas (") dentro das suas frases de 'Evidência'. Use sempre aspas simples (').
 
-                Retorne OBRIGATORIAMENTE o JSON preenchendo "r" com "Sim", "Não" ou "N/A":
+                Retorne OBRIGATORIAMENTE o JSON preenchendo 'r' com 'Sim', 'Não' ou 'N/A':
                 {{
                   "erro_fatal": false,
                   "operacional": {{
@@ -305,7 +305,7 @@ def process_all_calls():
                     response_format={"type": "json_object"}
                 )
                 res1 = json.loads(clean_json(chat1.choices[0].message.content))
-                time.sleep(3)
+                time.sleep(2)
 
                 # --------------------------------------------------
                 # AGENTE 2: SPIN COM AVALIAÇÃO JUSTA E FLEXÍVEL
@@ -333,7 +333,7 @@ def process_all_calls():
                     response_format={"type": "json_object"}
                 )
                 res2 = json.loads(clean_json(chat2.choices[0].message.content))
-                time.sleep(3)
+                time.sleep(2)
 
                 # --------------------------------------------------
                 # AGENTE 3: FEEDBACK TÁTICO, DIRETO E SEM DESCULPAS GENÉRICAS
@@ -344,7 +344,7 @@ def process_all_calls():
                 Você é o Diretor de Enablement. Sua missão é dar feedback técnico para o vendedor de forma absurdamente prática, útil e aplicável.
 
                 🚨 REGRA DE OURO INQUEBRÁVEL (TOLERÂNCIA ZERO PARA FEEDBACK GENÉRICO E PALESTRAS DE IA):
-                É EXPRESSAMENTE PROIBIDO usar palavras vazias e burocráticas como "você não seguiu o playbook", "você ignorou o roteiro", "faltou sequência lógica" ou "não seguiu as diretrizes". 
+                É EXPRESSAMENTE PROIBIDO usar palavras vazias e burocráticas como 'você não seguiu o playbook', 'você ignorou o roteiro', 'faltou sequência lógica' ou 'não seguiu as diretrizes'. 
                 Se você apontar um erro, VOCÊ DEVE OBRIGATORIAMENTE FORNECER A FALA EXATA que o vendedor deveria ter usado no lugar, como um treinador entregando uma receita prática de vendas.
 
                 🚨 REGRAS CRÍTICAS DE FORMATAÇÃO JSON (ANTI-ERRO):
@@ -416,12 +416,12 @@ def process_all_calls():
                     json.dump(db, sf, ensure_ascii=False, indent=4)
                 
                 print(f"✅ Auditoria Finalizada com Sucesso! SPIN: {nota_spin:.1f} | Conformidade: {nota_op:.1f}")
-                time.sleep(4)
+                time.sleep(2)
 
             except Exception as e:
                 print(f"❌ Erro na auditoria do ID {call_id}: {e}")
                 traceback.print_exc()
-                time.sleep(3)
+                time.sleep(2)
 
 if __name__ == "__main__":
     process_all_calls()
