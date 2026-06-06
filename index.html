@@ -34,255 +34,283 @@
         .pdf-no-break { page-break-inside: avoid !important; break-inside: avoid !important; }
     </style>
 </head>
-<body class="flex h-screen overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
+<body class="h-screen w-full overflow-hidden selection:bg-indigo-100 selection:text-indigo-900 bg-slate-50 relative">
 
-    <div class="w-64 bg-white h-full flex flex-col p-4 border-r border-slate-200 flex-shrink-0 z-20 shadow-sm">
-        <div class="flex items-center gap-3 py-4 border-b border-slate-100 mb-6 px-2">
-            <img src="logo.png" alt="Superlógica Imobi" class="h-8 w-auto object-contain" onerror="this.outerHTML='<div class=\'text-xl font-black text-indigo-600 tracking-tighter\'>Superlógica</div>'">
-        </div>
-        
-        <nav class="space-y-1.5 flex-1">
-            <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-4 mb-2 block mt-2">Menu Principal</span>
-            <button onclick="switchTab('geral')" id="menu-geral" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-active">
-                <i class="fa-solid fa-chart-pie w-5 text-center"></i> Visão Geral
-            </button>
-            <button onclick="switchTab('equipe')" id="menu-equipe" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-inactive">
-                <i class="fa-solid fa-users w-5 text-center"></i> Equipe SDR
-            </button>
-            <button onclick="switchTab('dash')" id="menu-dash" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-inactive">
-                <i class="fa-solid fa-chart-line w-5 text-center"></i> Analytics
-            </button>
-            <button onclick="switchTab('auditorias')" id="menu-auditorias" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-inactive">
-                <i class="fa-solid fa-folder-open w-5 text-center"></i> Dossiês
-            </button>
+    <div id="login-screen" class="absolute inset-0 bg-slate-100/50 backdrop-blur-sm flex items-center justify-center z-[100]">
+        <div class="card-light p-10 rounded-3xl w-full max-w-sm flex flex-col items-center text-center shadow-2xl border-slate-200">
+            <div class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center text-3xl font-black mb-4 shadow-sm border border-indigo-100">S</div>
+            <h2 class="text-2xl font-black text-slate-800 tracking-tight">Superlógica</h2>
+            <p class="text-xs text-slate-500 font-semibold mb-8 uppercase tracking-widest mt-1">Sales Audit Hub</p>
             
-            <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-4 mb-2 block mt-8">Treinamento</span>
-            <button onclick="switchTab('playbooks')" id="menu-playbooks" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-inactive">
-                <i class="fa-solid fa-book-bookmark w-5 text-center"></i> Playbooks SPIN
-            </button>
-        </nav>
-        
-        <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 mt-auto text-center">
-            <i class="fa-solid fa-shield-halved text-indigo-400 text-2xl mb-2"></i>
-            <p class="text-xs font-semibold text-slate-600">Auditoria Blindada</p>
-            <p class="text-[10px] text-slate-400 mt-1">IA de Alta Performance</p>
+            <div class="w-full space-y-5 text-left">
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1.5 block">Usuário</label>
+                    <input type="text" id="login-user" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition outline-none" placeholder="Ex: aquisições" onkeypress="handleEnter(event)">
+                </div>
+                <div>
+                    <label class="text-[10px] uppercase tracking-widest font-bold text-slate-500 mb-1.5 block">Senha de Acesso</label>
+                    <input type="password" id="login-pass" class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-xl px-4 py-3 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition outline-none" placeholder="••••••••" onkeypress="handleEnter(event)">
+                </div>
+                <div id="login-error" class="hidden bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold p-3 rounded-lg text-center flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i> Credenciais inválidas.
+                </div>
+                <button onclick="realizarLogin()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-4 py-3.5 transition shadow-md flex items-center justify-center gap-2 mt-2">
+                    Acessar Sistema <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </div>
         </div>
     </div>
 
-    <div class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-10 custom-scrollbar relative">
+    <div id="app-dashboard" class="hidden h-full w-full flex-row">
         
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 flex-shrink-0">
-            <div>
-                <div class="flex items-center gap-3">
-                    <h1 id="page-title" class="text-3xl font-extrabold text-slate-900 tracking-tight">Visão Geral</h1>
-                    <div class="hidden md:flex bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-[10px] font-bold items-center gap-1.5">
-                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Sistema Ativo
-                    </div>
-                </div>
-                <p class="text-sm text-slate-500 mt-1 font-medium">Auditoria operacional e inteligência de vendas em tempo real.</p>
+        <div class="w-64 bg-white h-full flex flex-col p-4 border-r border-slate-200 flex-shrink-0 z-20 shadow-sm">
+            <div class="flex items-center gap-3 py-4 border-b border-slate-100 mb-6 px-2">
+                <img src="logo.png" alt="Superlógica Imobi" class="h-8 w-auto object-contain" onerror="this.outerHTML='<div class=\'text-xl font-black text-indigo-600 tracking-tighter\'>Superlógica</div>'">
             </div>
-            <div class="flex gap-4">
-                <div class="w-56">
-                    <label class="text-[10px] uppercase text-slate-500 font-bold block mb-1.5 tracking-wider">Período Analisado</label>
-                    <div class="relative">
-                        <i class="fa-regular fa-calendar absolute left-3 top-2.5 text-slate-400"></i>
-                        <input type="text" id="date-range" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg pl-9 p-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none cursor-pointer shadow-sm transition" placeholder="Todo o Histórico">
-                    </div>
-                </div>
-                <div class="w-48">
-                    <label class="text-[10px] uppercase text-slate-500 font-bold block mb-1.5 tracking-wider">Filtro de SDR</label>
-                    <select id="filter-sdr" onchange="applyFilters()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg p-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none cursor-pointer shadow-sm transition">
-                        <option value="todos">Toda a Equipe</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-geral" class="space-y-8 animate-fade-in">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-star text-5xl text-indigo-600"></i></div>
-                    <span class="text-xs uppercase text-slate-500 font-bold tracking-widest block">Média SPIN</span>
-                    <h2 id="media-spin" class="text-4xl font-black text-slate-800 mt-2">0.0</h2>
-                    <p class="text-[10px] text-slate-400 mt-2 font-medium">Aderência à Metodologia</p>
-                </div>
-                <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-clipboard-check text-5xl text-purple-600"></i></div>
-                    <span class="text-xs uppercase text-slate-500 font-bold tracking-widest block">Conformidade</span>
-                    <h2 id="media-op" class="text-4xl font-black text-slate-800 mt-2">0.0</h2>
-                    <p class="text-[10px] text-slate-400 mt-2 font-medium">Execução de Processos</p>
-                </div>
-                <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-stopwatch text-5xl text-emerald-600"></i></div>
-                    <span class="text-xs uppercase text-slate-500 font-bold tracking-widest block">Ritmo (WPS)</span>
-                    <h2 id="media-wps" class="text-4xl font-black text-slate-800 mt-2 flex items-baseline gap-1">0.0 <span class="text-sm font-semibold text-slate-400">pal/s</span></h2>
-                    <p class="text-[10px] text-slate-400 mt-2 font-medium">Velocidade de Fala</p>
-                </div>
-                <div class="card-light p-6 rounded-2xl border-l-4 border-amber-400 relative overflow-hidden bg-amber-50/30 group">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-triangle-exclamation text-5xl text-amber-600"></i></div>
-                    <span class="text-xs uppercase text-amber-600 font-bold tracking-widest block">Para Ajuste</span>
-                    <h2 id="casos-criticos" class="text-4xl font-black text-slate-800 mt-2">0</h2>
-                    <p class="text-[10px] text-amber-600/70 mt-2 font-semibold">Feedbacks Pendentes</p>
-                </div>
-            </div>
-
-            <div class="card-light rounded-2xl overflow-hidden">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-list-check text-indigo-500"></i> Central de Ajustes e Feedback
-                        </h3>
-                        <p class="text-xs text-slate-500 mt-1 font-medium">Lotes de ligações que necessitam de calibração de roteiro.</p>
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-                                <th class="p-4 whitespace-nowrap">SDR Responsável</th>
-                                <th class="p-4 whitespace-nowrap">Data</th>
-                                <th class="p-4 text-center whitespace-nowrap">Produto</th>
-                                <th class="p-4 whitespace-nowrap">Motivo do Alerta</th>
-                                <th class="p-4 text-right pr-6 whitespace-nowrap">Ação</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-criticos" class="text-sm divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div id="tab-equipe" class="hidden space-y-8 animate-fade-in">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-cards-sdr"></div>
             
-            <div id="container-tabela-equipe" class="hidden card-light rounded-2xl overflow-hidden mt-8 border-t-4 border-indigo-500">
-                <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
-                    <div>
-                        <h3 id="titulo-tabela-equipe" class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-user-clock text-indigo-500"></i> Histórico do Colaborador
+            <nav class="space-y-1.5 flex-1">
+                <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-4 mb-2 block mt-2">Menu Principal</span>
+                <button onclick="switchTab('geral')" id="menu-geral" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-active">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> Visão Geral
+                </button>
+                <button onclick="switchTab('equipe')" id="menu-equipe" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-inactive">
+                    <i class="fa-solid fa-users w-5 text-center"></i> Equipe SDR
+                </button>
+                <button onclick="switchTab('dash')" id="menu-dash" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-inactive">
+                    <i class="fa-solid fa-chart-line w-5 text-center"></i> Analytics
+                </button>
+                <button onclick="switchTab('auditorias')" id="menu-auditorias" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-inactive">
+                    <i class="fa-solid fa-folder-open w-5 text-center"></i> Dossiês
+                </button>
+                
+                <span class="text-[10px] uppercase tracking-widest text-slate-400 font-bold ml-4 mb-2 block mt-8">Treinamento</span>
+                <button onclick="switchTab('playbooks')" id="menu-playbooks" class="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition sidebar-inactive">
+                    <i class="fa-solid fa-book-bookmark w-5 text-center"></i> Playbooks SPIN
+                </button>
+            </nav>
+            
+            <div class="p-4 bg-slate-50 rounded-xl border border-slate-100 mt-auto text-center cursor-pointer hover:bg-slate-100 transition" onclick="fazerLogout()">
+                <i class="fa-solid fa-shield-halved text-indigo-400 text-2xl mb-2"></i>
+                <p class="text-xs font-semibold text-slate-600">Auditoria Blindada</p>
+                <p class="text-[10px] text-slate-400 mt-1 hover:text-rose-500 font-bold"><i class="fa-solid fa-power-off"></i> Sair do Sistema</p>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-10 custom-scrollbar relative">
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 flex-shrink-0">
+                <div>
+                    <div class="flex items-center gap-3">
+                        <h1 id="page-title" class="text-3xl font-extrabold text-slate-900 tracking-tight">Visão Geral</h1>
+                        <div class="hidden md:flex bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full text-[10px] font-bold items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Sistema Ativo
+                        </div>
+                    </div>
+                    <p class="text-sm text-slate-500 mt-1 font-medium">Auditoria operacional e inteligência de vendas em tempo real.</p>
+                </div>
+                <div class="flex gap-4">
+                    <div class="w-56">
+                        <label class="text-[10px] uppercase text-slate-500 font-bold block mb-1.5 tracking-wider">Período Analisado</label>
+                        <div class="relative">
+                            <i class="fa-regular fa-calendar absolute left-3 top-2.5 text-slate-400"></i>
+                            <input type="text" id="date-range" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg pl-9 p-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none cursor-pointer shadow-sm transition" placeholder="Todo o Histórico">
+                        </div>
+                    </div>
+                    <div class="w-48">
+                        <label class="text-[10px] uppercase text-slate-500 font-bold block mb-1.5 tracking-wider">Filtro de SDR</label>
+                        <select id="filter-sdr" onchange="applyFilters()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg p-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none cursor-pointer shadow-sm transition">
+                            <option value="todos">Toda a Equipe</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-geral" class="space-y-8 animate-fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-star text-5xl text-indigo-600"></i></div>
+                        <span class="text-xs uppercase text-slate-500 font-bold tracking-widest block">Média SPIN</span>
+                        <h2 id="media-spin" class="text-4xl font-black text-slate-800 mt-2">0.0</h2>
+                        <p class="text-[10px] text-slate-400 mt-2 font-medium">Aderência à Metodologia</p>
+                    </div>
+                    <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-clipboard-check text-5xl text-purple-600"></i></div>
+                        <span class="text-xs uppercase text-slate-500 font-bold tracking-widest block">Conformidade</span>
+                        <h2 id="media-op" class="text-4xl font-black text-slate-800 mt-2">0.0</h2>
+                        <p class="text-[10px] text-slate-400 mt-2 font-medium">Execução de Processos</p>
+                    </div>
+                    <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-stopwatch text-5xl text-emerald-600"></i></div>
+                        <span class="text-xs uppercase text-slate-500 font-bold tracking-widest block">Ritmo (WPS)</span>
+                        <h2 id="media-wps" class="text-4xl font-black text-slate-800 mt-2 flex items-baseline gap-1">0.0 <span class="text-sm font-semibold text-slate-400">pal/s</span></h2>
+                        <p class="text-[10px] text-slate-400 mt-2 font-medium">Velocidade de Fala</p>
+                    </div>
+                    <div class="card-light p-6 rounded-2xl border-l-4 border-amber-400 relative overflow-hidden bg-amber-50/30 group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-triangle-exclamation text-5xl text-amber-600"></i></div>
+                        <span class="text-xs uppercase text-amber-600 font-bold tracking-widest block">Para Ajuste</span>
+                        <h2 id="casos-criticos" class="text-4xl font-black text-slate-800 mt-2">0</h2>
+                        <p class="text-[10px] text-amber-600/70 mt-2 font-semibold">Feedbacks Pendentes</p>
+                    </div>
+                </div>
+
+                <div class="card-light rounded-2xl overflow-hidden">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-list-check text-indigo-500"></i> Central de Ajustes e Feedback
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-1 font-medium">Lotes de ligações que necessitam de calibração de roteiro.</p>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                                    <th class="p-4 whitespace-nowrap">SDR Responsável</th>
+                                    <th class="p-4 whitespace-nowrap">Data</th>
+                                    <th class="p-4 text-center whitespace-nowrap">Produto</th>
+                                    <th class="p-4 whitespace-nowrap">Motivo do Alerta</th>
+                                    <th class="p-4 text-right pr-6 whitespace-nowrap">Ação</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-criticos" class="text-sm divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-equipe" class="hidden space-y-8 animate-fade-in">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-cards-sdr"></div>
+                
+                <div id="container-tabela-equipe" class="hidden card-light rounded-2xl overflow-hidden mt-8 border-t-4 border-indigo-500">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
+                        <div>
+                            <h3 id="titulo-tabela-equipe" class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-user-clock text-indigo-500"></i> Histórico do Colaborador
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-1 font-medium">Dossiê completo filtrado por vendedor.</p>
+                        </div>
+                        <button onclick="document.getElementById('filter-sdr').value='todos'; applyFilters();" class="text-xs bg-white hover:bg-slate-50 text-slate-600 font-semibold px-4 py-2 rounded-lg border border-slate-300 transition flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-arrow-left"></i> Ver Todos
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                                    <th class="p-4 pl-6">Data</th>
+                                    <th class="p-4">SDR</th>
+                                    <th class="p-4 text-center">Produto</th>
+                                    <th class="p-4 text-center">WPS</th>
+                                    <th class="p-4 text-center">SPIN</th>
+                                    <th class="p-4 text-center">Conformidade</th>
+                                    <th class="p-4 text-right pr-6">Auditoria</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-sdr-equipe" class="text-sm divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-dash" class="hidden space-y-8 animate-fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card-light p-8 rounded-2xl flex flex-col items-center">
+                        <h3 class="text-sm font-bold text-slate-800 mb-6 self-start flex items-center uppercase tracking-wider">
+                            <i class="fa-solid fa-chart-radar text-indigo-500 mr-2"></i> Aderência Metodológica (SPIN)
                         </h3>
-                        <p class="text-xs text-slate-500 mt-1 font-medium">Dossiê completo filtrado por vendedor.</p>
+                        <div class="w-full max-w-[450px] aspect-square relative">
+                            <canvas id="spiderChart"></canvas>
+                        </div>
+                        <div class="w-full mt-8 grid grid-cols-4 gap-3 border-t border-slate-100 pt-6">
+                            <div class="flex flex-col items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mb-1">Situação</span>
+                                <span id="rx-s" class="text-indigo-600 font-black text-lg">0.0</span>
+                            </div>
+                            <div class="flex flex-col items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mb-1">Problema</span>
+                                <span id="rx-p" class="text-indigo-600 font-black text-lg">0.0</span>
+                            </div>
+                            <div class="flex flex-col items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mb-1">Implicação</span>
+                                <span id="rx-i" class="text-indigo-600 font-black text-lg">0.0</span>
+                            </div>
+                            <div class="flex flex-col items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mb-1">Necessidade</span>
+                                <span id="rx-n" class="text-indigo-600 font-black text-lg">0.0</span>
+                            </div>
+                        </div>
                     </div>
-                    <button onclick="document.getElementById('filter-sdr').value='todos'; applyFilters();" class="text-xs bg-white hover:bg-slate-50 text-slate-600 font-semibold px-4 py-2 rounded-lg border border-slate-300 transition flex items-center gap-2 shadow-sm">
-                        <i class="fa-solid fa-arrow-left"></i> Ver Todos
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-                                <th class="p-4 pl-6">Data</th>
-                                <th class="p-4">SDR</th>
-                                <th class="p-4 text-center">Produto</th>
-                                <th class="p-4 text-center">WPS</th>
-                                <th class="p-4 text-center">SPIN</th>
-                                <th class="p-4 text-center">Conformidade</th>
-                                <th class="p-4 text-right pr-6">Auditoria</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-sdr-equipe" class="text-sm divide-y divide-slate-100"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
 
-        <div id="tab-dash" class="hidden space-y-8 animate-fade-in">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="card-light p-8 rounded-2xl flex flex-col items-center">
-                    <h3 class="text-sm font-bold text-slate-800 mb-6 self-start flex items-center uppercase tracking-wider">
-                        <i class="fa-solid fa-chart-radar text-indigo-500 mr-2"></i> Aderência Metodológica (SPIN)
-                    </h3>
-                    <div class="w-full max-w-[450px] aspect-square relative">
-                        <canvas id="spiderChart"></canvas>
-                    </div>
-                    <div class="w-full mt-8 grid grid-cols-4 gap-3 border-t border-slate-100 pt-6">
-                        <div class="flex flex-col items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mb-1">Situação</span>
-                            <span id="rx-s" class="text-indigo-600 font-black text-lg">0.0</span>
-                        </div>
-                        <div class="flex flex-col items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mb-1">Problema</span>
-                            <span id="rx-p" class="text-indigo-600 font-black text-lg">0.0</span>
-                        </div>
-                        <div class="flex flex-col items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mb-1">Implicação</span>
-                            <span id="rx-i" class="text-indigo-600 font-black text-lg">0.0</span>
-                        </div>
-                        <div class="flex flex-col items-center p-3 bg-slate-50 rounded-xl border border-slate-100">
-                            <span class="text-slate-400 font-bold uppercase tracking-wider text-[9px] mb-1">Necessidade</span>
-                            <span id="rx-n" class="text-indigo-600 font-black text-lg">0.0</span>
+                    <div class="card-light p-8 rounded-2xl flex flex-col">
+                        <h3 class="text-sm font-bold text-slate-800 mb-6 flex items-center uppercase tracking-wider">
+                            <i class="fa-solid fa-arrow-trend-up text-purple-500 mr-2"></i> Evolução Temporal Global
+                        </h3>
+                        <div class="w-full flex-1 relative min-h-[300px]">
+                            <canvas id="lineChart"></canvas>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="card-light p-8 rounded-2xl flex flex-col">
-                    <h3 class="text-sm font-bold text-slate-800 mb-6 flex items-center uppercase tracking-wider">
-                        <i class="fa-solid fa-arrow-trend-up text-purple-500 mr-2"></i> Evolução Temporal Global
-                    </h3>
-                    <div class="w-full flex-1 relative min-h-[300px]">
-                        <canvas id="lineChart"></canvas>
+            <div id="tab-auditorias" class="hidden animate-fade-in">
+                <div class="card-light rounded-2xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
+                                    <th class="p-4 pl-6">Data</th>
+                                    <th class="p-4">SDR</th>
+                                    <th class="p-4 text-center">Produto</th>
+                                    <th class="p-4 text-center">Ritmo (WPS)</th>
+                                    <th class="p-4 text-center">SPIN</th>
+                                    <th class="p-4 text-center">Conformidade</th>
+                                    <th class="p-4 text-right pr-6">Auditoria</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-historico" class="text-sm divide-y divide-slate-100"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div id="tab-auditorias" class="hidden animate-fade-in">
-            <div class="card-light rounded-2xl overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-                                <th class="p-4 pl-6">Data</th>
-                                <th class="p-4">SDR</th>
-                                <th class="p-4 text-center">Produto</th>
-                                <th class="p-4 text-center">Ritmo (WPS)</th>
-                                <th class="p-4 text-center">SPIN</th>
-                                <th class="p-4 text-center">Conformidade</th>
-                                <th class="p-4 text-right pr-6">Auditoria</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-historico" class="text-sm divide-y divide-slate-100"></tbody>
-                    </table>
+            <div id="tab-playbooks" class="hidden animate-fade-in max-w-5xl mx-auto w-full">
+                <div class="mb-8 text-center">
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Base de Conhecimento SPIN</h2>
+                    <p class="text-slate-500 text-sm mt-2">Referência de roteiro para alinhamento e treinamento da equipe.</p>
                 </div>
-            </div>
-        </div>
-
-        <div id="tab-playbooks" class="hidden animate-fade-in max-w-5xl mx-auto w-full">
-            <div class="mb-8 text-center">
-                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Base de Conhecimento SPIN</h2>
-                <p class="text-slate-500 text-sm mt-2">Referência de roteiro para alinhamento e treinamento da equipe.</p>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="card-light p-8 rounded-2xl border-t-4 border-indigo-500 hover:shadow-md transition">
-                    <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-3"><span class="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center">S</span> Situação</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6">Fatos, dados e cenário atual do cliente. Use com moderação para não transformar a call num interrogatório de IBGE.</p>
-                    <div class="space-y-3">
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-indigo-400 mr-2">🎯</span> "Qual sistema você usa hoje para gerenciar os repasses?"</div>
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-indigo-400 mr-2">🎯</span> "Hoje a sua imobiliária atua mais com vendas ou locação?"</div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card-light p-8 rounded-2xl border-t-4 border-indigo-500 hover:shadow-md transition">
+                        <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-3"><span class="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center">S</span> Situação</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-6">Fatos, dados e cenário atual do cliente. Use com moderação para não transformar a call num interrogatório de IBGE.</p>
+                        <div class="space-y-3">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-indigo-400 mr-2">🎯</span> "Qual sistema você usa hoje para gerenciar os repasses?"</div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-indigo-400 mr-2">🎯</span> "Hoje a sua imobiliária atua mais com vendas ou locação?"</div>
+                        </div>
                     </div>
-                </div>
-                <div class="card-light p-8 rounded-2xl border-t-4 border-amber-500 hover:shadow-md transition">
-                    <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-3"><span class="bg-amber-100 text-amber-600 w-8 h-8 rounded-lg flex items-center justify-center">P</span> Problema</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6">Investiga dores, insatisfações e dificuldades. Onde a operação do cliente trava hoje?</p>
-                    <div class="space-y-3">
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-amber-400 mr-2">🎯</span> "Você sente que sua equipe perde muito tempo fechando caixa?"</div>
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-amber-400 mr-2">🎯</span> "O seu sistema atual trava muito na emissão da DIMOB?"</div>
+                    <div class="card-light p-8 rounded-2xl border-t-4 border-amber-500 hover:shadow-md transition">
+                        <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-3"><span class="bg-amber-100 text-amber-600 w-8 h-8 rounded-lg flex items-center justify-center">P</span> Problema</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-6">Investiga dores, insatisfações e dificuldades. Onde a operação do cliente trava hoje?</p>
+                        <div class="space-y-3">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-amber-400 mr-2">🎯</span> "Esse sistema atual costuma apresentar lentidão ou gargalos?"</div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-amber-400 mr-2">🎯</span> "Você sente que a equipe perde muito tempo executando tarefas manuais?"</div>
+                        </div>
                     </div>
-                </div>
-                <div class="card-light p-8 rounded-2xl border-t-4 border-rose-500 hover:shadow-md transition">
-                    <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-3"><span class="bg-rose-100 text-rose-600 w-8 h-8 rounded-lg flex items-center justify-center">I</span> Implicação</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6">Desdobramentos do problema. Transforma uma dor "pequena" em algo urgente, mostrando impacto financeiro/tempo.</p>
-                    <div class="space-y-3">
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-rose-400 mr-2">🎯</span> "Se esse erro persistir, quanto de multa vocês podem pagar?"</div>
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-rose-400 mr-2">🎯</span> "Como essa perda de tempo afeta o volume de captações no mês?"</div>
+                    <div class="card-light p-8 rounded-2xl border-t-4 border-rose-500 hover:shadow-md transition">
+                        <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-3"><span class="bg-rose-100 text-rose-600 w-8 h-8 rounded-lg flex items-center justify-center">I</span> Implicação</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-6">Desdobramentos do problema. Transforma uma dor "pequena" em algo urgente, mostrando impacto financeiro/tempo.</p>
+                        <div class="space-y-3">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-rose-400 mr-2">🎯</span> "Se esse erro persistir, quanto de multa vocês podem pagar?"</div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-rose-400 mr-2">🎯</span> "Como essa perda de tempo afeta o volume de captações no mês?"</div>
+                        </div>
                     </div>
-                </div>
-                <div class="card-light p-8 rounded-2xl border-t-4 border-emerald-500 hover:shadow-md transition">
-                    <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-3"><span class="bg-emerald-100 text-emerald-600 w-8 h-8 rounded-lg flex items-center justify-center">N</span> Necessidade</h3>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6">Foca na solução e valor. Faz o cliente declarar o desejo pelo seu produto antes mesmo do pitch.</p>
-                    <div class="space-y-3">
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-emerald-400 mr-2">🎯</span> "Se você zerasse a inadimplência amanhã, o que mudaria no caixa?"</div>
-                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-emerald-400 mr-2">🎯</span> "Qual seria o impacto pro seu time ter tudo isso automatizado?"</div>
+                    <div class="card-light p-8 rounded-2xl border-t-4 border-emerald-500 hover:shadow-md transition">
+                        <h3 class="text-xl font-black text-slate-800 mb-2 flex items-center gap-3"><span class="bg-emerald-100 text-emerald-600 w-8 h-8 rounded-lg flex items-center justify-center">N</span> Necessidade</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed mb-6">Foca na solução e valor. Faz o cliente declarar o desejo pelo seu produto antes mesmo do pitch.</p>
+                        <div class="space-y-3">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-emerald-400 mr-2">🎯</span> "Se você zerasse a inadimplência amanhã, o que mudaria no caixa?"</div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 text-sm text-slate-700 font-medium"><span class="text-emerald-400 mr-2">🎯</span> "Qual seria o impacto pro seu time ter tudo isso automatizado?"</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -314,8 +342,54 @@
         let spiderChart, lineChart;
         let picker;
 
+        // =====================================
+        // CONTROLE DE ACESSO E SESSÃO
+        // =====================================
+        function checkSession() {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-dashboard').classList.remove('hidden');
+                document.getElementById('app-dashboard').classList.add('flex');
+                initSystem();
+            }
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                realizarLogin();
+            }
+        }
+
+        function realizarLogin() {
+            const user = document.getElementById('login-user').value.trim().toLowerCase();
+            const pass = document.getElementById('login-pass').value;
+            const errorMsg = document.getElementById('login-error');
+
+            // Aceita variações de acentuação para evitar bloqueios acidentais
+            if (user === 'aquisições' || user === 'aquisicoes' || user === 'aquisiçoes' || user === 'aquisição') {
+                if (pass === '2024') {
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    document.getElementById('login-screen').classList.add('hidden');
+                    document.getElementById('app-dashboard').classList.remove('hidden');
+                    document.getElementById('app-dashboard').classList.add('flex');
+                    initSystem();
+                    return;
+                }
+            }
+            
+            errorMsg.classList.remove('hidden');
+            setTimeout(() => errorMsg.classList.add('hidden'), 3000);
+        }
+
+        function fazerLogout() {
+            sessionStorage.removeItem('isLoggedIn');
+            window.location.reload();
+        }
+
+        // =====================================
+        // NÚCLEO DO SISTEMA E RENDERS
+        // =====================================
         function initCalendario() {
-            // Removido dark theme do flatpickr, usa o light/default
             picker = flatpickr("#date-range", { mode: "range", dateFormat: "Y-m-d", locale: "pt", onChange: applyFilters });
         }
 
@@ -334,7 +408,7 @@
             document.getElementById('page-title').innerText = titles[tab];
         }
 
-        async function init() {
+        async function initSystem() {
             initCalendario();
             try {
                 const response = await fetch('consolidated_data.json?v=' + Date.now());
@@ -659,7 +733,7 @@
             element.style.height = 'auto';
             element.style.width = '1280px'; 
             element.style.position = 'relative';
-            element.style.backgroundColor = '#ffffff'; // Fundo branco absoluto para impressão
+            element.style.backgroundColor = '#ffffff'; 
             
             const scrolls = element.querySelectorAll('.overflow-y-auto, .overflow-hidden, .custom-scrollbar, .max-h-72');
             scrolls.forEach(el => {
@@ -716,7 +790,8 @@
             });
         }
 
-        window.onload = init;
+        // Inicia a checagem de sessão ao abrir a página
+        window.onload = checkSession;
     </script>
 </body>
 </html>
