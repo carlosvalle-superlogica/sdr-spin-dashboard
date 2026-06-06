@@ -74,8 +74,8 @@ def calcular_nota_operacional(op_data, erro_fatal):
     """
     MATEMÁTICA ADITIVA RÍGIDA (A BUSCA PELO 10.0):
     O SDR começa com 0.0. Para tirar 10.0, precisa de 17 "Sim".
-    Qualquer "N/A" soma 0.0 (logo, o 10.0 já é impossível).
-    Qualquer "Não" aplica penalidade de acordo com a gravidade do erro.
+    Qualquer "N/A" soma 0.0 (logo, o teto da nota diminui naturalmente de forma justa).
+    Qualquer "Não" aplica penalidade real por erro ou oportunidade desperdiçada.
     """
     nota = 0.0
 
@@ -239,41 +239,43 @@ def process_all_calls():
                 wps = round(len(texto.split()) / segundos, 2) if segundos > 0 else 0.0
 
                 # --------------------------------------------------
-                # AGENTE 1: CONFORMIDADE COM N/A PROATIVO
+                # AGENTE 1: CONFORMIDADE CALIBRADA (SIM, NÃO E N/A)
                 # --------------------------------------------------
                 print(" -> Agente 1: Analisando Conformidade e Adaptação...")
                 prompt_agente1 = f"""
                 Você é o Agente 1: Auditor Comercial Inteligente. Avalie o SDR no produto {produto_detectado}.
                 
-                MUITO IMPORTANTE - USO ESTRATÉGICO DO N/A (FLEXIBILIDADE E ESCUTA ATIVA):
-                Se uma pergunta do processo de venda não precisou ser feita porque o Lead JÁ FORNECEU a informação de forma proativa na conversa (ex: o lead já disse espontaneamente qual era o problema ou quantos contratos ele tem), marque OBRIGATORIAMENTE 'N/A' na validação ou compreensão. NUNCA marque 'Não' se o SDR teve a inteligência de ouvir o lead atentamente e não repetir perguntas desnecessárias.
+                MUITO IMPORTANTE - REGRA DO SIM, NÃO E N/A:
+                - SIM (Objetivo Atingido): O SDR executou a técnica ativamente OU o lead entregou a informação de bandeja e o SDR teve a maturidade de não repetir a pergunta.
+                - NÃO (Oportunidade Desperdiçada): O cenário/oportunidade existiu na conversa, mas o SDR falhou, ignorou a dor, atropelou o cliente, leu script como robô ou quebrou o processo.
+                - N/A (Cenário Inexistente): A oportunidade técnica NUNCA se materializou (ex: lead não apresentou objeções, o lead monopolizou a fala sozinho, ou o lead foi desqualificado e a chamada foi abortada antes da agenda).
 
-                DIRETRIZES DE AUDITORIA:
+                DIRETRIZES DE AUDITORIA POR ITEM (LEIA E JULGUE COM ATENÇÃO):
                 [1. ESCUTA E ADAPTAÇÃO]
-                - escuta: O SDR adaptou a conversa? Se interrompeu o lead ou ignorou uma dor para ler o script passivamente, marque 'Não'.
-                - validacao: Marque 'N/A' se o lead foi tão claro que a validação não foi necessária. Marque 'Não' se o SDR mudou de assunto secamente após o lead confessar um problema grave.
-                - compreensao: Inteligência de fluxo. Marque 'Não' APENAS se o SDR perguntou de novo algo que o lead já tinha respondido antes, demonstrando desatenção.
-                - objecoes: Contornou barreiras? Se o lead não apresentou nenhuma objeção durante a call, marque OBRIGATORIAMENTE 'N/A'.
+                - escuta: SIM se o SDR ouviu e adaptou. NÃO se interrompeu ou ignorou algo para ler o script passivamente. N/A se a ligação foi 100% um monólogo do lead.
+                - validacao: SIM se o lead expôs dor e o SDR demonstrou empatia. NÃO se o lead desabafou e o SDR mudou de assunto secamente. N/A se o lead NÃO expôs nenhuma dor na chamada.
+                - compreensao: SIM se o SDR usou inteligentemente informações já ditas. NÃO se o SDR perguntou de novo algo que o lead já havia respondido. N/A se a chamada caiu antes de poder avaliar a memória.
+                - objecoes: SIM se contornou barreiras. NÃO se o lead trouxe objeção e o SDR aceitou facilmente ou desistiu. N/A se o lead concordou com tudo e NÃO apresentou objeção alguma.
 
                 [2. COMUNICAÇÃO E POSTURA B2B]
-                - linguagem: Norma culta. ATENÇÃO: Se o SDR usou diminutivos infantis e antiprofissionais (sisteminha, minutinho, propostinha, tempinho), marque 'Não'.
-                - receptividade: Executou a saudação completa de forma acolhedora?
-                - rapport: Aproveitou o contexto trazido pelo cliente para quebrar o gelo ou foi um robô?
-                - discurso: Usou vocabulário técnico correto do mercado imobiliário e soou como um especialista?
-                - compreensao_cliente: Validou com perguntas se o lead estava acompanhando a explicação técnica?
-                - clareza: Fez perguntas curtas e diretas ou confundiu o cliente?
+                - linguagem: SIM se manteve postura formal. NÃO se usou diminutivos infantis (sisteminha, minutinho, propostinha). N/A se quase não há amostra de voz do SDR para avaliar.
+                - receptividade: SIM se executou saudação acolhedora. NÃO se começou de forma ríspida ou confusa. N/A se a gravação já começou no meio da conversa.
+                - rapport: SIM se aproveitou contexto para quebrar o gelo. NÃO se iniciou interrogatório seco. N/A se o lead atendeu apressado/agressivo matando a chance de rapport.
+                - discurso: SIM se usou vocabulário técnico imobiliário correto. NÃO se falou bobagem técnica. N/A se a ligação abortou antes de entrar no tema do sistema.
+                - compreensao_cliente: SIM se após explicar algo, perguntou se fez sentido. NÃO se fez um monólogo gigante sem checar entendimento. N/A se não houve explicação de produto/processo.
+                - clareza: SIM se fez perguntas curtas e diretas. NÃO se fez perguntas confusas. N/A se o SDR quase não fez perguntas.
 
                 [3. PROCESSO E QUALIFICAÇÃO]
                 - sla: 
-                  * Para {produto_detectado} CRM: Coletou Número de Corretores E Situação do CRECI?
-                  * Para {produto_detectado} ERP: Coletou Quantidade de Contratos E Bancos operados?
-                  (Se o lead já entregou a informação sozinho na fala dele sem precisar ser perguntado, marque 'Sim' ou 'N/A').
-                - spin: Seguiu a sequência exploratória de investigação ou só apresentou funcionalidades como um panfleto?
-                - dor: Encontrou um gargalo real? Se o lead deu respostas vazias e o SDR não insistiu para descobrir a verdade, marque 'Não'.
-                - gestao: Mapeou e descobriu quem toma a decisão final?
-                - passos_ro: Conseguiu a confirmação VERBAL CLARA de que o lead estará num COMPUTADOR na próxima reunião? Se o SDR aceitou um "vou ver pelo celular" ou "estarei no carro", marque 'Não'.
-                - produto: Conectou a solução tecnológica à dor do cliente de forma inteligente?
-                - gatilhos: Gerou valor e urgência de agenda para o próximo agendamento?
+                  * {produto_detectado} CRM: Coletou Número de Corretores E Situação do CRECI?
+                  * {produto_detectado} ERP: Coletou Quantidade de Contratos E Bancos operados?
+                  (SIM se coletou ou se o lead já falou sozinho. NÃO se não descobriu. N/A se o lead foi desqualificado antes disso).
+                - spin: SIM se fez investigação sequencial lógica. NÃO se virou um "panfleteiro" apresentando funcionalidades do nada. N/A se o lead já despejou o cenário e problemas todos sozinho.
+                - dor: SIM se arrancou uma dor real. NÃO se o lead deu respostas rasas e o SDR não insistiu para descobrir o gargalo. N/A se o lead for irredutível e blindado afirmando estar tudo perfeito.
+                - gestao: SIM se mapeou o decisor ou se o lead revelou. NÃO se agendou sem fazer ideia de quem decide. N/A se desqualificou antes dessa fase.
+                - passos_ro: SIM se conseguiu a confirmação VERBAL CLARA de que o lead estará num COMPUTADOR na próxima reunião. NÃO se aceitou "vou ver pelo celular/carro". N/A se a ligação NÃO gerou agendamento de reunião.
+                - produto: SIM se conectou a solução à dor de forma inteligente. NÃO se tentou empurrar agenda listando recursos inúteis pro cliente. N/A se não evoluiu para o pitch de agendamento.
+                - gatilhos: SIM se gerou valor e urgência de agenda. NÃO se agendou de forma desleixada. N/A se a ligação NÃO gerou agendamento de reunião.
 
                 REGRAS DE ERRO FATAL E JSON: 
                 - Marque 'erro_fatal': true APENAS se o SDR quebrar o sigilo e passar preço ou agendar reunião com lead fora de perfil.
