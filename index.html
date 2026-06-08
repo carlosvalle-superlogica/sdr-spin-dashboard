@@ -9,7 +9,7 @@
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -100,7 +100,7 @@
 
         <div class="flex-1 flex flex-col overflow-y-auto p-8 lg:p-10 custom-scrollbar relative">
             
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 flex-shrink-0">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-end mb-8 gap-4 flex-shrink-0">
                 <div>
                     <div class="flex items-center gap-3">
                         <h1 id="page-title" class="text-3xl font-extrabold text-slate-900 tracking-tight">Visão Geral</h1>
@@ -110,13 +110,22 @@
                     </div>
                     <p class="text-sm text-slate-500 mt-1 font-medium">Auditoria operacional e inteligência de vendas em tempo real.</p>
                 </div>
-                <div class="flex gap-4">
+                <div class="flex flex-wrap gap-4">
                     <div class="w-56">
                         <label class="text-[10px] uppercase text-slate-500 font-bold block mb-1.5 tracking-wider">Período Analisado</label>
                         <div class="relative">
                             <i class="fa-regular fa-calendar absolute left-3 top-2.5 text-slate-400"></i>
                             <input type="text" id="date-range" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg pl-9 p-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none cursor-pointer shadow-sm transition" placeholder="Todo o Histórico">
                         </div>
+                    </div>
+                    <div class="w-48">
+                        <label class="text-[10px] uppercase text-slate-500 font-bold block mb-1.5 tracking-wider">Status Geral</label>
+                        <select id="filter-status" onchange="applyFilters()" class="w-full bg-white border border-slate-300 text-slate-700 rounded-lg p-2 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:outline-none cursor-pointer shadow-sm transition">
+                            <option value="todos">🚦 Todos</option>
+                            <option value="OK">🟢 Apenas OK</option>
+                            <option value="ATENÇÃO">🟡 Apenas Atenção</option>
+                            <option value="CRÍTICO">🔴 Apenas Críticos</option>
+                        </select>
                     </div>
                     <div class="w-48">
                         <label class="text-[10px] uppercase text-slate-500 font-bold block mb-1.5 tracking-wider">Filtro de SDR</label>
@@ -128,30 +137,36 @@
             </div>
 
             <div id="tab-geral" class="space-y-8 animate-fade-in">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
-                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-star text-5xl text-indigo-600"></i></div>
-                        <span class="text-xs uppercase text-slate-500 font-bold tracking-widest block">Média SPIN</span>
-                        <h2 id="media-spin" class="text-4xl font-black text-slate-800 mt-2">0.0</h2>
-                        <p class="text-[10px] text-slate-400 mt-2 font-medium">Aderência à Metodologia</p>
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl relative overflow-hidden group shadow-lg text-white">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-crown text-5xl text-indigo-400"></i></div>
+                        <span class="text-[10px] uppercase text-slate-400 font-bold tracking-widest block">Nota Geral</span>
+                        <h2 id="media-geral" class="text-4xl font-black text-white mt-2">0.0</h2>
+                        <p class="text-[9px] text-slate-400 mt-2 font-medium uppercase tracking-wider">Ponderação 60/40</p>
                     </div>
                     <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
                         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-clipboard-check text-5xl text-purple-600"></i></div>
-                        <span class="text-xs uppercase text-slate-500 font-bold tracking-widest block">Conformidade</span>
+                        <span class="text-[10px] uppercase text-slate-500 font-bold tracking-widest block">Conformidade</span>
                         <h2 id="media-op" class="text-4xl font-black text-slate-800 mt-2">0.0</h2>
-                        <p class="text-[10px] text-slate-400 mt-2 font-medium">Execução de Processos</p>
+                        <p class="text-[9px] text-slate-400 mt-2 font-medium uppercase tracking-wider">Processos (60%)</p>
+                    </div>
+                    <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-star text-5xl text-indigo-600"></i></div>
+                        <span class="text-[10px] uppercase text-slate-500 font-bold tracking-widest block">Média SPIN</span>
+                        <h2 id="media-spin" class="text-4xl font-black text-slate-800 mt-2">0.0</h2>
+                        <p class="text-[9px] text-slate-400 mt-2 font-medium uppercase tracking-wider">Técnica (40%)</p>
                     </div>
                     <div class="card-light p-6 rounded-2xl relative overflow-hidden group">
                         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-stopwatch text-5xl text-emerald-600"></i></div>
-                        <span class="text-xs uppercase text-slate-500 font-bold tracking-widest block">Ritmo (WPS)</span>
+                        <span class="text-[10px] uppercase text-slate-500 font-bold tracking-widest block">Ritmo (WPS)</span>
                         <h2 id="media-wps" class="text-4xl font-black text-slate-800 mt-2 flex items-baseline gap-1">0.0 <span class="text-sm font-semibold text-slate-400">pal/s</span></h2>
-                        <p class="text-[10px] text-slate-400 mt-2 font-medium">Velocidade de Fala</p>
+                        <p class="text-[9px] text-slate-400 mt-2 font-medium uppercase tracking-wider">Velocidade de Fala</p>
                     </div>
-                    <div class="card-light p-6 rounded-2xl border-l-4 border-amber-400 relative overflow-hidden bg-amber-50/30 group">
-                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-triangle-exclamation text-5xl text-amber-600"></i></div>
-                        <span class="text-xs uppercase text-amber-600 font-bold tracking-widest block">Para Ajuste</span>
+                    <div class="card-light p-6 rounded-2xl border-l-4 border-rose-500 relative overflow-hidden bg-rose-50/30 group">
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition duration-300"><i class="fa-solid fa-triangle-exclamation text-5xl text-rose-600"></i></div>
+                        <span class="text-[10px] uppercase text-rose-600 font-bold tracking-widest block">Foco Crítico</span>
                         <h2 id="casos-criticos" class="text-4xl font-black text-slate-800 mt-2">0</h2>
-                        <p class="text-[10px] text-amber-600/70 mt-2 font-semibold">Feedbacks Pendentes</p>
+                        <p class="text-[9px] text-rose-600/70 mt-2 font-bold uppercase tracking-wider">Revisões Pendentes</p>
                     </div>
                 </div>
 
@@ -161,16 +176,16 @@
                             <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
                                 <i class="fa-solid fa-list-check text-indigo-500"></i> Central de Ajustes e Feedback
                             </h3>
-                            <p class="text-xs text-slate-500 mt-1 font-medium">Lotes de ligações que necessitam de calibração de roteiro.</p>
+                            <p class="text-xs text-slate-500 mt-1 font-medium">Lotes de ligações que necessitam de intervenção ou alinhamento tático.</p>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
                                 <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-                                    <th class="p-4 whitespace-nowrap">SDR Responsável</th>
+                                    <th class="p-4 whitespace-nowrap pl-6">SDR Responsável</th>
                                     <th class="p-4 whitespace-nowrap">Data</th>
-                                    <th class="p-4 text-center whitespace-nowrap">Produto</th>
+                                    <th class="p-4 text-center whitespace-nowrap">Geral</th>
                                     <th class="p-4 whitespace-nowrap">Motivo do Alerta</th>
                                     <th class="p-4 text-right pr-6 whitespace-nowrap">Ação</th>
                                 </tr>
@@ -182,7 +197,7 @@
             </div>
 
             <div id="tab-equipe" class="hidden space-y-8 animate-fade-in">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-cards-sdr"></div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6" id="grid-cards-sdr"></div>
                 
                 <div id="container-tabela-equipe" class="hidden card-light rounded-2xl overflow-hidden mt-8 border-t-4 border-indigo-500">
                     <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
@@ -206,6 +221,7 @@
                                     <th class="p-4 text-center">WPS</th>
                                     <th class="p-4 text-center">SPIN</th>
                                     <th class="p-4 text-center">Conformidade</th>
+                                    <th class="p-4 text-center">Geral</th>
                                     <th class="p-4 text-right pr-6">Auditoria</th>
                                 </tr>
                             </thead>
@@ -263,9 +279,10 @@
                                     <th class="p-4 pl-6">Data</th>
                                     <th class="p-4">SDR</th>
                                     <th class="p-4 text-center">Produto</th>
-                                    <th class="p-4 text-center">Ritmo (WPS)</th>
+                                    <th class="p-4 text-center"> Ritmo (WPS)</th>
                                     <th class="p-4 text-center">SPIN</th>
                                     <th class="p-4 text-center">Conformidade</th>
+                                    <th class="p-4 text-center">Geral</th>
                                     <th class="p-4 text-right pr-6">Auditoria</th>
                                 </tr>
                             </thead>
@@ -278,7 +295,7 @@
             <div id="tab-playbooks" class="hidden animate-fade-in max-w-6xl mx-auto w-full pb-10">
                 <div class="mb-10 text-center">
                     <h2 class="text-3xl font-black text-slate-800 tracking-tight">Base de Conhecimento Sales Audit</h2>
-                    <p class="text-slate-500 text-sm mt-2 max-w-2xl mx-auto">Referência completa de roteiro, técnicas e conformidade operacional para alinhamento e treinamento da equipe SDR.</p>
+                    <p class="text-slate-500 text-sm mt-2 max-w-2xl mx-auto">Referência completa de roteiro e conformidade rígida que norteia os Feedbacks da Inteligência Artificial.</p>
                 </div>
 
                 <div class="mb-14">
@@ -302,9 +319,9 @@
                         </div>
                         <div class="card-light p-6 rounded-2xl border-t-4 border-rose-500">
                             <h4 class="text-lg font-black text-slate-800 mb-2 flex items-center gap-2"><span class="bg-rose-100 text-rose-600 w-7 h-7 rounded text-sm flex items-center justify-center">I</span> Implicação</h4>
-                            <p class="text-slate-500 text-sm mb-4">Desdobramentos do problema. Crie urgência.</p>
+                            <p class="text-slate-500 text-sm mb-4">Desdobramentos do problema. Crie urgência extrema aqui.</p>
                             <div class="space-y-2">
-                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-700">"Se o erro persistir, quanto de multa pagam?"</div>
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-700">"Se o erro persistir, quanto de multa vocês pagam?"</div>
                                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs text-slate-700">"Como essa perda de tempo afeta as captações?"</div>
                             </div>
                         </div>
@@ -320,64 +337,56 @@
                 </div>
 
                 <div>
-                    <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center gap-3"><i class="fa-solid fa-list-check text-purple-500"></i> Gabarito de Conformidade (Os 17 Critérios)</h3>
-                    <p class="text-sm text-slate-500 mb-8 border-b border-slate-200 pb-4">O manual definitivo de como a Inteligência Artificial pontua a sua ligação para compor a nota 10.0.</p>
+                    <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center gap-3"><i class="fa-solid fa-list-check text-purple-500"></i> Gabarito de Conformidade Rígida (Os 17 Critérios)</h3>
+                    <p class="text-sm text-slate-500 mb-8 border-b border-slate-200 pb-4">O manual definitivo e intolerante de como a Inteligência Artificial pontua as chamadas para compor a nota 10.0.</p>
 
                     <h4 class="text-[10px] font-black uppercase tracking-widest text-indigo-600 mb-4 ml-2">Bloco 1: Escuta e Adaptação</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">1. Escuta Ativa</h5>
                             <p class="text-xs text-slate-600 mb-3">Ouvir o cliente e adaptar o roteiro. Não seja um robô lendo script.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"Nossa, até as 20h? E isso acontece com frequência no fim do mês?"</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">2. Validação (Ancoragem)</h5>
                             <p class="text-xs text-slate-600 mb-3">"Carimbar" o problema na mente do lead antes de avançar.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"Deixa eu ver se entendi: seu principal gargalo hoje é o controle manual, certo?"</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">3. Compreensão (Fluxo)</h5>
                             <p class="text-xs text-slate-600 mb-3">Atenção plena. Não faça perguntas que o cliente já respondeu sozinho.</p>
-                            <div class="bg-rose-50/50 p-3 rounded-lg border border-rose-100"><span class="text-[9px] uppercase font-bold text-rose-600 block mb-1">O que Reprova</span><p class="text-xs text-slate-700">Perguntar "Quantos contratos vocês têm?" se o lead já falou isso no minuto 2.</p></div>
+                            <div class="bg-rose-50/50 p-3 rounded-lg border border-rose-100"><span class="text-[9px] uppercase font-bold text-rose-600 block mb-1">O que Reprova</span><p class="text-xs text-slate-700">Perguntar "Quantos contratos?" se o lead já falou isso 2 minutos antes.</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">4. Contorno de Objeções</h5>
                             <p class="text-xs text-slate-600 mb-3">Não recuar no primeiro "não" ou desculpa de falta de tempo.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"Justamente por sua rotina ser corrida que eu liguei. O sistema devolve o seu tempo."</p></div>
                         </div>
                     </div>
 
                     <h4 class="text-[10px] font-black uppercase tracking-widest text-purple-600 mb-4 ml-2">Bloco 2: Comunicação e Postura B2B</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-10">
-                        <div class="card-light p-5 rounded-2xl">
-                            <h5 class="text-sm font-bold text-slate-800 mb-1">5. Linguagem</h5>
-                            <p class="text-xs text-slate-600 mb-3">Comunicação profissional B2B. Zero vícios e gírias.</p>
-                            <div class="bg-rose-50/50 p-3 rounded-lg border border-rose-100"><span class="text-[9px] uppercase font-bold text-rose-600 block mb-1">O que Reprova</span><p class="text-xs text-slate-700">Diminutivos (sisteminha, propostinha) e vícios (tipo assim, né).</p></div>
+                        <div class="card-light p-5 rounded-2xl border-l-4 border-rose-400">
+                            <h5 class="text-sm font-bold text-slate-800 mb-1">5. Linguagem B2B</h5>
+                            <p class="text-xs text-slate-600 mb-3">Tolerância zero para uso de diminutivos ou gírias corporativas chulas.</p>
+                            <div class="bg-rose-50/50 p-3 rounded-lg border border-rose-100"><span class="text-[9px] uppercase font-bold text-rose-600 block mb-1">O que Reprova Automaticamente</span><p class="text-xs text-slate-700">Falar "sisteminha", "propostinha" ou "minutinho".</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">6. Receptividade</h5>
                             <p class="text-xs text-slate-600 mb-3">Energia alta e uso do script de saudação padrão.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"Olá [Nome], bom dia! Aqui é o [Nome] da Superlógica, tudo bem?"</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">7. Rapport</h5>
                             <p class="text-xs text-slate-600 mb-3">Quebra de gelo baseada em contexto real da imobiliária.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"Vi no portal de vocês que têm uma carteira forte na região Sul..."</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">8. Discurso (Autoridade)</h5>
                             <p class="text-xs text-slate-600 mb-3">Domínio dos termos do mercado imobiliário e postura de Especialista.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">Falar com segurança sobre DIMOB, Repasse, Inadimplência.</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">9. Compreensão do Cliente</h5>
                             <p class="text-xs text-slate-600 mb-3">Pausar e validar se o lead entendeu sua explicação complexa.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"Conseguiu visualizar como essa automação funcionaria na sua operação?"</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">10. Clareza</h5>
-                            <p class="text-xs text-slate-600 mb-3">Perguntas diretas e fáceis de responder.</p>
-                            <div class="bg-rose-50/50 p-3 rounded-lg border border-rose-100"><span class="text-[9px] uppercase font-bold text-rose-600 block mb-1">O que Reprova</span><p class="text-xs text-slate-700">Perguntas duplas: "Usam sistema ou planilha, e alimentam todo dia?"</p></div>
+                            <p class="text-xs text-slate-600 mb-3">Perguntas diretas e fáceis de responder. Sem enrolação.</p>
                         </div>
                     </div>
 
@@ -385,7 +394,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="card-light p-5 rounded-2xl border-l-4 border-emerald-400">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">11. Coleta de SLA (MANDATÓRIO)</h5>
-                            <p class="text-xs text-slate-600 mb-3">Critérios que decidem se o lead é lixo ou oportunidade.</p>
+                            <p class="text-xs text-slate-600 mb-3">A ausência de UM ÚNICO item abaixo zera este critério.</p>
                             <ul class="text-xs text-slate-700 space-y-1.5 font-medium">
                                 <li><span class="text-emerald-500">✔</span> <b>CRM:</b> Nº de Corretores + Situação do CRECI</li>
                                 <li><span class="text-emerald-500">✔</span> <b>ERP:</b> Vol. de Contratos + Bancos Operados</li>
@@ -393,32 +402,29 @@
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">12. Metodologia SPIN</h5>
-                            <p class="text-xs text-slate-600 mb-3">Obrigatório aplicar as etapas de investigação (Acima).</p>
+                            <p class="text-xs text-slate-600 mb-3">Obrigatório aplicar as etapas de investigação e não virar um "panfleteiro".</p>
                         </div>
-                        <div class="card-light p-5 rounded-2xl">
-                            <h5 class="text-sm font-bold text-slate-800 mb-1">13. Uso da Dor</h5>
-                            <p class="text-xs text-slate-600 mb-3">Não aceite evasivas. Cave até achar o incômodo operacional.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"Se pudesse mudar uma única coisa hoje para ficar mais rápido, o que seria?"</p></div>
+                        <div class="card-light p-5 rounded-2xl border-l-4 border-rose-400">
+                            <h5 class="text-sm font-bold text-slate-800 mb-1">13. Aprofundamento de Dor</h5>
+                            <p class="text-xs text-slate-600 mb-3">Não aceite evasivas. Cave até achar o impacto financeiro.</p>
+                            <div class="bg-rose-50/50 p-3 rounded-lg border border-rose-100"><span class="text-[9px] uppercase font-bold text-rose-600 block mb-1">O que Reprova</span><p class="text-xs text-slate-700 italic">Ouvir o lead dizer que o "sistema é lento" e não fazer nenhuma pergunta para descobrir o que essa lentidão custa pra empresa.</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">14. Gestão de Decisão</h5>
-                            <p class="text-xs text-slate-600 mb-3">Mapear o organograma e quem assina o cheque.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"Além de você, existe mais algum sócio que precisa avaliar a ferramenta?"</p></div>
+                            <p class="text-xs text-slate-600 mb-3">Mapear o organograma e saber se o lead tem poder de assinatura.</p>
                         </div>
-                        <div class="card-light p-5 rounded-2xl border-l-4 border-rose-400 bg-rose-50/20">
+                        <div class="card-light p-5 rounded-2xl border-l-4 border-rose-600 bg-rose-50/20">
                             <h5 class="text-sm font-bold text-rose-800 mb-1">15. Passos RO (PC/NOTEBOOK)</h5>
-                            <p class="text-xs text-slate-600 mb-3">Trava anti no-show. O lead PRECISA assumir compromisso explícito.</p>
-                            <div class="bg-white p-3 rounded-lg border border-rose-100"><span class="text-[9px] uppercase font-bold text-rose-600 block mb-1">Obrigatório ouvir o "Sim"</span><p class="text-xs text-slate-700 italic font-medium">"Posso confirmar que amanhã você estará na frente de um computador para ver a tela?"</p></div>
+                            <p class="text-xs text-slate-600 mb-3">Trava anti no-show. O lead PRECISA assumir compromisso explícito e claro.</p>
+                            <div class="bg-white p-3 rounded-lg border border-rose-100"><span class="text-[9px] uppercase font-bold text-rose-600 block mb-1">Obrigatório ouvir o "Sim" Firme</span><p class="text-xs text-slate-700 italic font-medium">Aceitar respostas como "vou tentar ver" ou "vejo do celular pelo carro" causa a REPROVAÇÃO IMEDIATA deste critério.</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">16. Venda do Produto</h5>
                             <p class="text-xs text-slate-600 mb-3">Conectar o pitch da Superlógica DIRETAMENTE à dor confessada.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"Como você me disse que perde horas, a demonstração será focada no módulo de conciliação."</p></div>
                         </div>
                         <div class="card-light p-5 rounded-2xl">
                             <h5 class="text-sm font-bold text-slate-800 mb-1">17. Gatilhos Mentais</h5>
-                            <p class="text-xs text-slate-600 mb-3">Valorizar o Closer criando urgência e escassez de agenda.</p>
-                            <div class="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100"><span class="text-[9px] uppercase font-bold text-emerald-600 block mb-1">Dica de Ouro</span><p class="text-xs text-slate-700 italic">"A agenda do especialista é muito concorrida, mas vou verificar se consigo um encaixe..."</p></div>
+                            <p class="text-xs text-slate-600 mb-3">Valorizar o Closer criando urgência e escassez de agenda real.</p>
                         </div>
                     </div>
                 </div>
@@ -426,7 +432,7 @@
         </div>
     </div>
 
-    <div id="modal-sdr" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 lg:p-8 z-50 transition-opacity">
+    <div id="modal-sdr" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 lg:p-8 z-50 transition-opacity">
         <div id="printable-dossier" class="bg-white w-[1280px] max-w-full rounded-3xl h-[95vh] flex flex-col shadow-2xl relative overflow-hidden">
             <div class="px-8 py-6 border-b border-slate-200 flex justify-between items-center bg-white flex-shrink-0 z-10">
                 <div>
@@ -504,7 +510,7 @@
             document.getElementById(`menu-${tab}`).classList.add('sidebar-active');
             document.getElementById(`menu-${tab}`).classList.remove('sidebar-inactive');
             
-            const titles = { geral: "Visão Geral", equipe: "Equipe SDR", dash: "Dashboard Analytics", auditorias: "Histórico & Dossiês", playbooks: "Base de Conhecimento" };
+            const titles = { geral: "Visão Geral", equipe: "Equipe SDR", dash: "Dashboard Analytics", auditorias: "Histórico & Dossiês", playbooks: "Base de Conhecimento Rígida" };
             document.getElementById('page-title').innerText = titles[tab];
         }
 
@@ -527,17 +533,39 @@
                 applyFilters();
             } catch (e) { 
                 console.error("Aguardando dados...", e);
-                document.getElementById('tabela-historico').innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-500 font-medium">Sem dados. Por favor, processe as chamadas na Action do GitHub.</td></tr>`;
+                document.getElementById('tabela-historico').innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-500 font-medium">Sem dados. Por favor, processe as chamadas na Action do GitHub.</td></tr>`;
                 document.getElementById('tabela-criticos').innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-500 font-medium">Nenhum dado processado.</td></tr>`;
             }
         }
 
+        function getSafeNotaGeral(c) {
+            if (c.nota_geral !== undefined) return parseFloat(c.nota_geral);
+            // Backward compatibility para chamadas antes da atualização
+            let nop = parseFloat(c.nota_op) || 0;
+            let nsp = parseFloat(c.nota_spin) || 0;
+            return (nop * 0.6) + (nsp * 0.4);
+        }
+
+        function getSafeStatus(c) {
+            if (c.status) return c.status;
+            // Backward compatibility
+            let ng = getSafeNotaGeral(c);
+            if (c.erro_fatal || ng <= 6.4) return "CRÍTICO";
+            if (ng <= 8.4) return "ATENÇÃO";
+            return "OK";
+        }
+
         function applyFilters() {
             const sdrSel = document.getElementById('filter-sdr').value;
+            const statusSel = document.getElementById('filter-status').value;
             const dates = picker.selectedDates;
             
             let filtrados = Object.values(database).filter(c => {
                 if (sdrSel !== 'todos' && c.sdr !== sdrSel) return false;
+                
+                let cStatus = getSafeStatus(c);
+                if (statusSel !== 'todos' && cStatus !== statusSel) return false;
+
                 if (dates.length === 2 && c.data) {
                     try {
                         let dataStr = c.data.split(' ')[0];
@@ -571,6 +599,7 @@
             const tbCriticos = document.getElementById('tabela-criticos');
             
             if(!dados || dados.length === 0) {
+                document.getElementById('media-geral').innerText = "0.0";
                 document.getElementById('media-spin').innerText = "0.0";
                 document.getElementById('media-op').innerText = "0.0";
                 document.getElementById('media-wps').innerText = "0.0";
@@ -581,12 +610,15 @@
             }
             
             const t = dados.length;
+            const sumG = dados.reduce((a,c)=>a+getSafeNotaGeral(c),0)/t;
             const sumS = dados.reduce((a,c)=>a+(parseFloat(c.nota_spin)||0),0)/t;
             const sumO = dados.reduce((a,c)=>a+(parseFloat(c.nota_op)||0),0)/t;
             const sumW = dados.reduce((a,c)=>a+(parseFloat(c.wps)||0),0)/t;
             
-            const listaCriticos = dados.filter(c => c.urgencia === "SIM").sort((a,b) => new Date(b.data.split(' ')[0]) - new Date(a.data.split(' ')[0]));
+            // Só exibe críticos e atenções na tabela de pendências se não estiverem filtrados
+            const listaCriticos = dados.filter(c => getSafeStatus(c) !== "OK").sort((a,b) => new Date(b.data.split(' ')[0]) - new Date(a.data.split(' ')[0]));
             
+            document.getElementById('media-geral').innerText = sumG.toFixed(1);
             document.getElementById('media-spin').innerText = sumS.toFixed(1);
             document.getElementById('media-op').innerText = sumO.toFixed(1);
             document.getElementById('media-wps').innerText = sumW.toFixed(2);
@@ -599,49 +631,63 @@
             
             Object.keys(dictSDR).sort().forEach(nome => {
                 const chamadas = dictSDR[nome];
+                const mGeral = chamadas.reduce((a,c)=>a+getSafeNotaGeral(c),0)/chamadas.length;
                 const mSpin = chamadas.reduce((a,c)=>a+(parseFloat(c.nota_spin)||0),0)/chamadas.length;
                 const mOp = chamadas.reduce((a,c)=>a+(parseFloat(c.nota_op)||0),0)/chamadas.length;
                 
+                let borderClass = 'border-emerald-500';
+                let badgeHTML = '<span class="px-2 py-1 bg-emerald-50 text-emerald-700 font-bold text-[10px] uppercase rounded border border-emerald-200">🟢 OK</span>';
+                
+                if (mGeral <= 6.4) {
+                    borderClass = 'border-rose-500';
+                    badgeHTML = '<span class="px-2 py-1 bg-rose-50 text-rose-700 font-bold text-[10px] uppercase rounded border border-rose-200">🔴 Crítico</span>';
+                } else if (mGeral <= 8.4) {
+                    borderClass = 'border-amber-500';
+                    badgeHTML = '<span class="px-2 py-1 bg-amber-50 text-amber-700 font-bold text-[10px] uppercase rounded border border-amber-200">🟡 Atenção</span>';
+                }
+
                 gridCards.innerHTML += `
-                    <div class="card-light p-6 rounded-2xl hover:shadow-md transition cursor-pointer group" onclick="document.getElementById('filter-sdr').value='${nome}'; applyFilters();">
-                        <div class="flex items-center gap-4 mb-6">
-                            <div class="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center font-bold shadow-sm text-lg">${nome.substring(0,2).toUpperCase()}</div>
-                            <div>
-                                <h4 class="font-bold text-slate-800 text-base group-hover:text-indigo-600 transition">${nome}</h4>
-                                <span class="text-[10px] text-slate-400 uppercase tracking-widest block font-semibold">${chamadas.length} chamadas</span>
+                    <div class="card-light p-6 rounded-2xl border-t-4 ${borderClass} hover:shadow-md transition cursor-pointer group flex flex-col justify-between h-full" onclick="document.getElementById('filter-sdr').value='${nome}'; applyFilters();">
+                        <div class="flex items-start justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-700 border border-slate-200 flex items-center justify-center font-bold shadow-sm text-lg">${nome.substring(0,2).toUpperCase()}</div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-base group-hover:text-indigo-600 transition">${nome}</h4>
+                                    <span class="text-[10px] text-slate-400 uppercase tracking-widest block font-semibold">${chamadas.length} chamadas analisadas</span>
+                                </div>
                             </div>
+                            <div>${badgeHTML}</div>
                         </div>
-                        <div class="grid grid-cols-2 gap-4 text-center">
-                            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100"><span class="text-[10px] text-slate-400 uppercase block font-bold mb-1 tracking-wider">SPIN</span><span class="text-xl font-black text-indigo-600">${mSpin.toFixed(1)}</span></div>
-                            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100"><span class="text-[10px] text-slate-400 uppercase block font-bold mb-1 tracking-wider">Conformidade</span><span class="text-xl font-black text-purple-600">${mOp.toFixed(1)}</span></div>
+                        <div class="grid grid-cols-3 gap-3 text-center">
+                            <div class="bg-slate-800 rounded-xl p-3 shadow-inner"><span class="text-[9px] text-slate-400 uppercase block font-bold mb-1 tracking-wider">Geral</span><span class="text-xl font-black text-white">${mGeral.toFixed(1)}</span></div>
+                            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100"><span class="text-[9px] text-slate-400 uppercase block font-bold mb-1 tracking-wider">Conf.</span><span class="text-xl font-black text-slate-800">${mOp.toFixed(1)}</span></div>
+                            <div class="bg-slate-50 rounded-xl p-3 border border-slate-100"><span class="text-[9px] text-slate-400 uppercase block font-bold mb-1 tracking-wider">SPIN</span><span class="text-xl font-black text-slate-800">${mSpin.toFixed(1)}</span></div>
                         </div>
                     </div>`;
             });
 
             tbCriticos.innerHTML = '';
             if(listaCriticos.length === 0) {
-                tbCriticos.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-emerald-600 font-semibold bg-emerald-50/50">Nenhum ponto de atenção detectado! Todos operando no padrão.</td></tr>`;
+                tbCriticos.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-emerald-600 font-semibold bg-emerald-50/50 rounded-b-xl border-t border-emerald-100">✨ Excelente! Nenhum ponto crítico pendente na visão atual.</td></tr>`;
             } else {
                 listaCriticos.forEach(c => {
-                    let motivo = "";
-                    let nOp = parseFloat(c.nota_op) || 0;
-                    let nSpin = parseFloat(c.nota_spin) || 0;
-
-                    if (nOp < 10.0) {
-                        motivo = '<span class="flex items-center gap-1.5 font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-md text-xs w-max border border-rose-100">🔴 Ajuste Conformidade</span>';
-                    } else if (nSpin <= 5.0) {
-                        motivo = '<span class="flex items-center gap-1.5 font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md text-xs w-max border border-amber-100">🟡 Ajuste SPIN</span>';
-                    } else {
-                        motivo = '<span class="flex items-center gap-1.5 font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md text-xs w-max border border-emerald-100">🟢 Estável</span>';
+                    let st = getSafeStatus(c);
+                    let nGeral = getSafeNotaGeral(c);
+                    
+                    let motivoHTML = "";
+                    if (st === "CRÍTICO") {
+                        motivoHTML = '<span class="flex items-center gap-1.5 font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-md text-[11px] w-max border border-rose-100 uppercase tracking-wider">🔴 Intervenção Urgente</span>';
+                    } else if (st === "ATENÇÃO") {
+                        motivoHTML = '<span class="flex items-center gap-1.5 font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-md text-[11px] w-max border border-amber-100 uppercase tracking-wider">🟡 Requer Alinhamento</span>';
                     }
 
                     tbCriticos.innerHTML += `
                         <tr class="hover:bg-slate-50 transition border-b border-slate-100 last:border-0">
-                            <td class="p-4 font-bold text-slate-800">${c.sdr}</td>
-                            <td class="p-4 text-slate-500 font-medium">${c.data}</td>
-                            <td class="p-4 text-center"><span class="bg-slate-100 px-2.5 py-1 rounded border border-slate-200 text-[10px] uppercase font-bold text-slate-600">${c.produto}</span></td>
-                            <td class="p-4">${motivo}</td>
-                            <td class="p-4 text-right pr-6"><button onclick="abrirDossie('${c.id}')" class="text-indigo-600 font-bold bg-indigo-50 px-4 py-1.5 rounded-lg border border-indigo-100 hover:bg-indigo-600 hover:text-white transition shadow-sm text-xs">Revisar</button></td>
+                            <td class="p-4 pl-6 font-bold text-slate-800">${c.sdr}</td>
+                            <td class="p-4 text-slate-500 font-medium text-xs">${c.data}</td>
+                            <td class="p-4 text-center"><span class="px-2 py-1 bg-slate-800 text-white font-black rounded text-xs">${nGeral.toFixed(1)}</span></td>
+                            <td class="p-4">${motivoHTML}</td>
+                            <td class="p-4 text-right pr-6"><button onclick="abrirDossie('${c.id}')" class="text-indigo-600 font-bold bg-indigo-50 px-4 py-1.5 rounded-lg border border-indigo-100 hover:bg-indigo-600 hover:text-white transition shadow-sm text-xs">Revisar Falha</button></td>
                         </tr>`;
                 });
             }
@@ -669,13 +715,22 @@
 
             const dadosCronologicos = [...dados].sort((a,b) => new Date(a.data.split(' ')[0]) - new Date(b.data.split(' ')[0]));
             const labels = dadosCronologicos.map(c => c.data.split(' ')[0]);
+            
+            const n_geral = dadosCronologicos.map(c => getSafeNotaGeral(c));
             const n_spin = dadosCronologicos.map(c => parseFloat(c.nota_spin) || 0);
             const n_op = dadosCronologicos.map(c => parseFloat(c.nota_op) || 0);
             
             if(lineChart) lineChart.destroy();
             lineChart = new Chart(document.getElementById('lineChart'), {
                 type: 'line',
-                data: { labels, datasets: [{ label: 'SPIN', data: n_spin, borderColor: '#4f46e5', backgroundColor: '#4f46e5', tension: 0.3, borderWidth: 2, pointRadius: 3 }, { label: 'Conformidade', data: n_op, borderColor: '#a855f7', backgroundColor: '#a855f7', tension: 0.3, borderWidth: 2, pointRadius: 3 }]},
+                data: { 
+                    labels, 
+                    datasets: [
+                        { label: 'Nota Geral', data: n_geral, borderColor: '#1e293b', backgroundColor: '#1e293b', tension: 0.3, borderWidth: 3, pointRadius: 4 },
+                        { label: 'Conformidade', data: n_op, borderColor: '#a855f7', backgroundColor: '#a855f7', tension: 0.3, borderWidth: 2, borderDash: [5, 5], pointRadius: 2 },
+                        { label: 'SPIN', data: n_spin, borderColor: '#4f46e5', backgroundColor: '#4f46e5', tension: 0.3, borderWidth: 2, borderDash: [5, 5], pointRadius: 2 }
+                    ]
+                },
                 options: { maintainAspectRatio: false, scales: { y: { min: 0, max: 10, grid: {color: '#e2e8f0'} }, x: { grid: {color: '#e2e8f0'}, ticks: {display: false} } }, plugins: { legend: { position: 'bottom', labels: {color: '#64748b', boxWidth: 12, font: {weight: 'bold'}} } } }
             });
         }
@@ -688,7 +743,7 @@
             if(tbEquipe) tbEquipe.innerHTML = '';
 
             if(!dados || dados.length === 0) { 
-                const emptyStr = `<tr><td colspan="7" class="p-6 text-center text-slate-500">Sem registros no período.</td></tr>`;
+                const emptyStr = `<tr><td colspan="8" class="p-6 text-center text-slate-500">Sem registros no período para o status selecionado.</td></tr>`;
                 tbHistorico.innerHTML = emptyStr;
                 if(tbEquipe) tbEquipe.innerHTML = emptyStr;
                 return; 
@@ -696,21 +751,23 @@
 
             let htmlStr = '';
             dados.sort((a,b)=>b.id - a.id).forEach(c => {
-                const wColor = (c.wps||0) < 1.5 || (c.wps||0) > 2.5 ? 'text-amber-500' : 'text-emerald-600';
+                const wColor = (c.wps||0) < 1.5 || (c.wps||0) > 3.0 ? 'text-amber-500' : 'text-emerald-600';
                 
+                let st = getSafeStatus(c);
                 let dotStatus = '🟢';
-                if ((parseFloat(c.nota_op) || 0) < 10.0) dotStatus = '🔴';
-                else if ((parseFloat(c.nota_spin) || 0) <= 5.0) dotStatus = '🟡';
+                if (st === 'CRÍTICO') dotStatus = '🔴';
+                else if (st === 'ATENÇÃO') dotStatus = '🟡';
 
                 htmlStr += `
                 <tr class="hover:bg-slate-50 transition text-xs border-b border-slate-100 last:border-0">
                     <td class="p-4 pl-6 text-slate-500 font-medium whitespace-nowrap">${c.data}</td>
-                    <td class="p-4 font-bold text-slate-800 flex items-center gap-2 whitespace-nowrap"><span class="text-sm select-none">${dotStatus}</span>${c.sdr}</td>
-                    <td class="p-4 text-center whitespace-nowrap"><span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200 text-slate-600 font-bold uppercase">${c.produto}</span></td>
+                    <td class="p-4 font-bold text-slate-800 flex items-center gap-2 whitespace-nowrap"><span class="text-[10px] select-none">${dotStatus}</span>${c.sdr}</td>
+                    <td class="p-4 text-center whitespace-nowrap"><span class="bg-slate-100 px-2 py-0.5 rounded border border-slate-200 text-slate-600 font-bold uppercase text-[10px]">${c.produto}</span></td>
                     <td class="p-4 text-center font-mono font-bold ${wColor} whitespace-nowrap">${parseFloat(c.wps||0).toFixed(2)}</td>
-                    <td class="p-4 text-center whitespace-nowrap"><span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 font-black text-sm">${parseFloat(c.nota_spin||0).toFixed(1)}</span></td>
-                    <td class="p-4 text-center whitespace-nowrap"><span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-100 font-black text-sm">${parseFloat(c.nota_op||0).toFixed(1)}</span></td>
-                    <td class="p-4 text-right pr-6 whitespace-nowrap"><button onclick="abrirDossie('${c.id}')" class="bg-white text-indigo-600 border border-slate-200 shadow-sm px-4 py-1.5 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition font-bold">Analisar</button></td>
+                    <td class="p-4 text-center whitespace-nowrap"><span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-100 font-black text-[11px]">${parseFloat(c.nota_spin||0).toFixed(1)}</span></td>
+                    <td class="p-4 text-center whitespace-nowrap"><span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 border border-purple-100 font-black text-[11px]">${parseFloat(c.nota_op||0).toFixed(1)}</span></td>
+                    <td class="p-4 text-center whitespace-nowrap"><span class="px-2.5 py-1 rounded bg-slate-800 text-white font-black text-xs shadow-sm">${getSafeNotaGeral(c).toFixed(1)}</span></td>
+                    <td class="p-4 text-right pr-6 whitespace-nowrap"><button onclick="abrirDossie('${c.id}')" class="bg-white text-indigo-600 border border-slate-200 shadow-sm px-4 py-1.5 rounded-lg hover:border-indigo-300 hover:bg-indigo-50 transition font-bold text-[11px] uppercase tracking-wider">Abrir</button></td>
                 </tr>`;
             });
             
@@ -735,8 +792,14 @@
 
         function abrirDossie(id) {
             const c = database[id];
+            
+            let st = getSafeStatus(c);
+            let corDossie = 'text-emerald-600';
+            if (st === 'CRÍTICO') corDossie = 'text-rose-600';
+            else if (st === 'ATENÇÃO') corDossie = 'text-amber-600';
+
             document.getElementById('modal-title').innerText = `Auditoria: ${c.sdr}`;
-            document.getElementById('modal-subtitle').innerText = `ID: ${c.id} | Produto: ${c.produto} | Duração: ${c.duracao}`;
+            document.getElementById('modal-subtitle').innerHTML = `ID: ${c.id} &nbsp;|&nbsp; Produto: ${c.produto} &nbsp;|&nbsp; Duração: ${c.duracao} &nbsp;|&nbsp; <span class="${corDossie} font-black">STATUS: ${st}</span>`;
             
             let safeUrl = c.deal_url;
             if (safeUrl && safeUrl.includes('](')) {
@@ -746,7 +809,7 @@
 
             document.getElementById('modal-links').innerHTML = `
                 <button id="btn-gerar-pdf" onclick="exportarDossiePDF()" class="bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 text-xs px-4 py-2 rounded-lg transition font-bold shadow-sm flex items-center gap-2">
-                    <i class="fa-solid fa-file-pdf"></i> Gerar PDF
+                    <i class="fa-solid fa-file-pdf"></i> PDF
                 </button>
                 ${safeUrl ? `<a href="${safeUrl}" target="_blank" class="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-600 hover:text-white text-xs px-4 py-2 rounded-lg transition font-bold shadow-sm flex items-center gap-2"><i class="fa-solid fa-briefcase"></i> Negócio</a>` : ''}
                 <a href="${c.audio_url}" target="_blank" class="bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-600 hover:text-white text-xs px-4 py-2 rounded-lg transition font-bold shadow-sm flex items-center gap-2"><i class="fa-solid fa-headphones"></i> Gravação</a>
@@ -763,26 +826,30 @@
                 <div class="mb-8"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-ear-listen text-indigo-500 text-sm"></i> Escuta & Adaptação</h3>
                 ${itemHTML('Escuta Ativa', f.escuta)}${itemHTML('Validação', f.validacao)}${itemHTML('Compreensão', f.compreensao)}${itemHTML('Contorno de Objeções', f.objecoes)}</div>
                 
-                <div class="mb-8"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-comments text-purple-500 text-sm"></i> Comunicação</h3>
-                ${itemHTML('Linguagem/Vícios', f.linguagem)}${itemHTML('Receptividade', f.receptividade)}${itemHTML('Rapport', f.rapport)}${itemHTML('Discurso e Tom', f.discurso)}${itemHTML('Clareza', f.clareza)}</div>
+                <div class="mb-8"><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-comments text-purple-500 text-sm"></i> Comunicação B2B</h3>
+                ${itemHTML('Linguagem B2B', f.linguagem)}${itemHTML('Receptividade', f.receptividade)}${itemHTML('Rapport', f.rapport)}${itemHTML('Discurso de Autoridade', f.discurso)}${itemHTML('Clareza', f.clareza)}</div>
                 
-                <div><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-check-double text-emerald-500 text-sm"></i> Conformidade de Regras (${c.produto})</h3>
-                ${itemHTML('Coleta de SLA', f.sla)}${itemHTML('SPIN (3 etapas)', f.spin)}${itemHTML('Uso da Dor', f.dor)}${itemHTML('Gestão/Preço', f.gestao)}${itemHTML('Passos RO (Computador)', f.passos_ro)}${itemHTML('Venda do Produto', f.produto)}${itemHTML('Gatilhos Mentais', f.gatilhos)}</div>
+                <div><h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2"><i class="fa-solid fa-check-double text-emerald-500 text-sm"></i> Processo Rígido (${c.produto})</h3>
+                ${itemHTML('Coleta de SLA', f.sla)}${itemHTML('SPIN (3 etapas)', f.spin)}${itemHTML('Uso da Dor', f.dor)}${itemHTML('Gestão de Decisão', f.gestao)}${itemHTML('Passos RO (COMPUTADOR)', f.passos_ro)}${itemHTML('Conexão Produto/Dor', f.produto)}${itemHTML('Gatilhos de Urgência', f.gatilhos)}</div>
             `;
 
             document.getElementById('modal-tecnico').innerHTML = `
-                <div class="grid grid-cols-3 gap-6 mb-8">
-                    <div class="bg-indigo-50 border border-indigo-100 p-5 rounded-2xl text-center shadow-sm pdf-no-break">
-                        <span class="text-[10px] font-bold tracking-widest text-indigo-600 uppercase block mb-1">Aderência SPIN</span>
-                        <span class="text-4xl font-black text-indigo-900">${parseFloat(c.nota_spin||0).toFixed(1)}</span>
+                <div class="grid grid-cols-4 gap-4 mb-8">
+                    <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl text-center shadow-lg pdf-no-break flex flex-col justify-center">
+                        <span class="text-[9px] font-bold tracking-widest text-slate-400 uppercase block mb-1">Nota Geral</span>
+                        <span class="text-4xl font-black text-white">${getSafeNotaGeral(c).toFixed(1)}</span>
                     </div>
-                    <div class="bg-purple-50 border border-purple-100 p-5 rounded-2xl text-center shadow-sm pdf-no-break">
-                        <span class="text-[10px] font-bold tracking-widest text-purple-600 uppercase block mb-1">Conformidade</span>
-                        <span class="text-4xl font-black text-purple-900">${parseFloat(c.nota_op||0).toFixed(1)}</span>
+                    <div class="bg-indigo-50 border border-indigo-100 p-4 rounded-2xl text-center shadow-sm pdf-no-break flex flex-col justify-center">
+                        <span class="text-[9px] font-bold tracking-widest text-indigo-600 uppercase block mb-1">SPIN</span>
+                        <span class="text-3xl font-black text-indigo-900">${parseFloat(c.nota_spin||0).toFixed(1)}</span>
                     </div>
-                    <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl text-center shadow-sm pdf-no-break">
-                        <span class="text-[10px] font-bold tracking-widest text-emerald-600 uppercase block mb-1">Ritmo (WPS)</span>
-                        <span class="text-4xl font-black text-emerald-900">${parseFloat(c.wps||0).toFixed(2)}</span>
+                    <div class="bg-purple-50 border border-purple-100 p-4 rounded-2xl text-center shadow-sm pdf-no-break flex flex-col justify-center">
+                        <span class="text-[9px] font-bold tracking-widest text-purple-600 uppercase block mb-1">Conf.</span>
+                        <span class="text-3xl font-black text-purple-900">${parseFloat(c.nota_op||0).toFixed(1)}</span>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl text-center shadow-sm pdf-no-break flex flex-col justify-center">
+                        <span class="text-[9px] font-bold tracking-widest text-emerald-600 uppercase block mb-1">WPS</span>
+                        <span class="text-3xl font-black text-emerald-900">${parseFloat(c.wps||0).toFixed(2)}</span>
                     </div>
                 </div>
                 
